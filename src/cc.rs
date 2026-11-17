@@ -959,7 +959,7 @@ pub fn scan(inv: &mut Inventory, opts: &CcOptions) -> Result<()> {
                     if let Some(d) = db.as_mut() {
                         let total = d.facts.iter().filter(|f| f.role == Role::Source).count();
                         d.facts
-                            .retain(|f| f.object.as_ref().map_or(true, |o| objects.contains(o)));
+                            .retain(|f| f.object.as_ref().is_none_or(|o| objects.contains(o)));
                         let kept = d.facts.iter().filter(|f| f.role == Role::Source).count();
                         inv.properties.insert(
                             "sbom-attest:compile-units".into(),
