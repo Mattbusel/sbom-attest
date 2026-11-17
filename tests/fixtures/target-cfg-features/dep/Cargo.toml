@@ -1,0 +1,10 @@
+[package]
+name="dep"
+version="0.1.0"
+edition="2021"
+[dependencies]
+x={path="../x",optional=true}
+y={path="../y",optional=true}
+[features]
+a=["dep:x"]
+b=["dep:y"]

@@ -1,0 +1,34 @@
+[package]
+name = "sbom-attest"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+description = "Build-time SBOMs for mixed Rust and C/C++ embedded builds: CycloneDX 1.6 and SPDX 2.3 with the CISA 2026 minimum elements, vendor-vs-independent SBOM diff, signed in-toto/SLSA provenance and a DoWI 8430.01 evidence bundle"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Mattbusel/sbom-attest"
+documentation = "https://docs.rs/sbom-attest"
+readme = "README.md"
+keywords = ["sbom", "cyclonedx", "spdx", "slsa", "in-toto"]
+categories = ["command-line-utilities", "development-tools", "embedded"]
+authors = ["Matt Busel <matt@busel.dev>"]
+exclude = ["/tests", "/ci", "/.github"]
+
+[[bin]]
+name = "sbom-attest"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+base64 = "0.22"
+clap = { version = "4.5", features = ["derive"] }
+goblin = "0.9"
+miniz_oxide = "0.8"
+p256 = { version = "0.13", features = ["ecdsa", "pem", "pkcs8"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+serde_json = "1"
+sha2 = "0.10"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
