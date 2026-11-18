@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+- Fix: a binary's DT_NEEDED libraries are only resolved to library files built for
+  the same ELF machine. Before, an ARM binary cross-compiled on an x86_64 host had
+  `libc.so.6`, `libm.so.6` and the rest resolved to the host's x86_64 files, and the
+  SBOM carried those paths and hashes. Now those stay soname-only when no matching
+  library is on the search path. `cc::elf_machine` is new and `cc::resolve_needed`
+  takes the expected machine.
+
 ## 0.2.0
 
 Library-friendly release. The CLI is unchanged.

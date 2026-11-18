@@ -376,6 +376,22 @@ impl LinkFacts {
     }
 }
 
+/// The `e_machine` field of an ELF file, or `None` if `path` is not ELF.
+pub fn elf_machine(path: &Path) -> Option<u16> {
+    use std::io::Read;
+    let mut h = [0u8; 20];
+    std::fs::File::open(path).ok()?.read_exact(&mut h).ok()?;
+    if h[..4] != *b"ELF" {
+        return None;
+    }
+    let m = [h[18], h[19]];
+    Some(if h[5] == 2 {
+        u16::from_be_bytes(m)
+    } else {
+        u16::from_le_bytes(m)
+    })
+}
+
 fn default_lib_dirs() -> Vec<PathBuf> {
     let mut v: Vec<PathBuf> = vec!["/usr/local/lib".into()];
     for multi in [
@@ -1013,11 +1029,16 @@ pub fn scan(inv: &mut Inventory, opts: &CcOptions) -> Result<()> {
 /// library: one already in the inventory with that file name (a shared library this
 /// build linked, or a package file seen at link time), else the file found on the
 /// RUNPATH or in the system library directories, with its owning package.
+///
+/// `machine` is the artifact's ELF `e_machine` (see [`elf_machine`]). When it is
+/// given, a library file built for another machine is not a match, so a binary
+/// cross-compiled for ARM is not resolved to the build host's x86_64 libc.
 pub fn resolve_needed(
     inv: &mut Inventory,
     root: &Path,
     runpaths: &[PathBuf],
     use_dpkg: bool,
+    machine: Option<u16>,
 ) -> Result<()> {
     let ids: Vec<String> = inv
         .components
@@ -1043,7 +1064,10 @@ pub fn resolve_needed(
             .map(|c| c.id.clone());
         let target = match existing {
             Some(t) => Some(t),
-            None => match dirs.iter().map(|d| d.join(&soname)).find(|p| p.is_file()) {
+            None => match dirs.iter().map(|d| d.join(&soname)).find(|p| {
+                p.is_file()
+                    && (machine.is_none() || elf_machine(p).is_none_or(|m| Some(m) == machine))
+            }) {
                 Some(p) => {
                     let p = normalize(&p);
                     let fact = FileFact {
@@ -1422,6 +1446,53 @@ fn add_facts(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn elf_header(machine: u16) -> Vec<u8> {
+        let mut h = vec![0u8; 64];
+        h[..4].copy_from_slice(b"ELF");
+        h[4] = 2; // 64-bit
+        h[5] = 1; // little endian
+        h[18..20].copy_from_slice(&machine.to_le_bytes());
+        h
+    }
+
+    #[test]
+    fn needed_library_must_match_the_artifact_machine() {
+        let dir = std::env::temp_dir().join(format!("sbom-attest-needed-{}", std::process::id()));
+        let (x86, arm) = (dir.join("x86"), dir.join("arm"));
+        std::fs::create_dir_all(&x86).unwrap();
+        std::fs::create_dir_all(&arm).unwrap();
+        std::fs::write(x86.join("libdemo.so.1"), elf_header(62)).unwrap(); // EM_X86_64
+        std::fs::write(arm.join("libdemo.so.1"), elf_header(40)).unwrap(); // EM_ARM
+        assert_eq!(elf_machine(&x86.join("libdemo.so.1")), Some(62));
+        assert_eq!(elf_machine(&dir), None);
+
+        let resolve = |machine: Option<u16>| {
+            let root = Component::new("root", Kind::Application, "app");
+            let mut inv = Inventory::new(root, "1970-01-01T00:00:00Z".into());
+            inv.add(Component::new(
+                "dynlib:libdemo.so.1",
+                Kind::Library,
+                "libdemo.so.1",
+            ));
+            resolve_needed(&mut inv, &dir, &[x86.clone(), arm.clone()], false, machine).unwrap();
+            inv.components
+                .values()
+                .filter_map(|c| c.properties.get("sbom-attest:path").cloned())
+                .collect::<Vec<_>>()
+        };
+        // An ARM binary skips the x86_64 library that comes first on the search path.
+        let arm_paths = resolve(Some(40));
+        assert_eq!(arm_paths.len(), 1, "{arm_paths:?}");
+        assert!(arm_paths[0].contains("arm"), "{arm_paths:?}");
+        // Unknown machine keeps the old first-match behaviour.
+        let any = resolve(None);
+        assert!(any.len() == 1 && any[0].contains("x86"), "{any:?}");
+        // No library of the right machine: the soname stays unresolved.
+        let none = resolve(Some(183)); // EM_AARCH64
+        assert!(none.is_empty(), "{none:?}");
+        std::fs::remove_dir_all(&dir).ok();
+    }
 
     #[test]
     fn splits_shell() {

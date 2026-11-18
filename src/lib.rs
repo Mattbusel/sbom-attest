@@ -317,7 +317,8 @@ pub fn generate(o: &GenerateOptions) -> Result<Inventory> {
             .iter()
             .map(|r| PathBuf::from(r.replace("$ORIGIN", &util::slash(&origin))))
             .collect();
-        cc::resolve_needed(&mut inv, &project_root, &runpaths, o.use_dpkg)?;
+        let machine = cc::elf_machine(b);
+        cc::resolve_needed(&mut inv, &project_root, &runpaths, o.use_dpkg, machine)?;
     }
     inv.author = o.author.clone();
     if inv.phases.is_empty() {
