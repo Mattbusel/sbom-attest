@@ -238,50 +238,7 @@ pub fn apply(inv: &mut Inventory, path: &Path, info: &BinaryInfo) {
     let root_id = inv.root.id.clone();
 
     if let Some(pkgs) = &info.auditable {
-        let ids: Vec<String> = pkgs
-            .iter()
-            .map(|p| match p.source.as_str() {
-                "crates.io" | "local" => format!("pkg:cargo/{}@{}", p.name, p.version),
-                "git" => format!("cargo:{}@{}+git", p.name, p.version),
-                _ => format!("cargo:{}@{}+local", p.name, p.version),
-            })
-            .collect();
-        for (i, p) in pkgs.iter().enumerate() {
-            let id = if p.root {
-                root_id.clone()
-            } else {
-                ids[i].clone()
-            };
-            let mut c = Component::new(id.clone(), Kind::Library, &p.name);
-            c.version = Some(p.version.clone());
-            c.lang = Lang::Rust;
-            c.purl = Some(format!(
-                "pkg:cargo/{}@{}",
-                purl_escape(&p.name),
-                purl_escape(&p.version)
-            ));
-            c.scope = if p.build_only {
-                Scope::Excluded
-            } else {
-                Scope::Required
-            };
-            c.evidence.insert("cargo-auditable".into());
-            if p.root {
-                inv.root.evidence.insert("cargo-auditable".into());
-            } else {
-                inv.add(c);
-            }
-            for d in &p.deps {
-                if let Some(dp) = pkgs.get(*d) {
-                    let to = if dp.root {
-                        root_id.clone()
-                    } else {
-                        ids[*d].clone()
-                    };
-                    inv.depend(&id, &to);
-                }
-            }
-        }
+        apply_auditable(inv, pkgs);
     }
 
     for lib in &info.needed {
@@ -292,6 +249,95 @@ pub fn apply(inv: &mut Inventory, path: &Path, info: &BinaryInfo) {
         c.lang = Lang::C;
         inv.add(c);
         inv.depend(&root_id, &format!("dynlib:{lib}"));
+    }
+}
+
+/// Merge the binary's cargo-auditable dependency list into the inventory.
+///
+/// When the Rust side already ran (`cargo tree` for the same package and target),
+/// that resolution is the reference: cargo-auditable records the dependency graph
+/// from `cargo metadata`, which unifies features across the whole workspace and can
+/// list crates that are never compiled into the artifact (test helpers, optional
+/// backends). Matching packages get the `cargo-auditable` evidence; packages only
+/// cargo-auditable lists are not added as components but are reported in the
+/// `sbom-attest:auditable-only` property, so the cross-check stays visible without
+/// putting crates in the SBOM that the binary does not contain. Without a cargo
+/// scan, the embedded list is the only source and is used as is.
+fn apply_auditable(inv: &mut Inventory, pkgs: &[AuditablePkg]) {
+    let root_id = inv.root.id.clone();
+    let cargo_scanned = inv
+        .components
+        .values()
+        .any(|c| c.evidence.contains("cargo-tree"));
+    let ids: Vec<String> = pkgs
+        .iter()
+        .map(|p| {
+            if p.root {
+                return root_id.clone();
+            }
+            match p.source.as_str() {
+                "crates.io" | "local" => format!("pkg:cargo/{}@{}", p.name, p.version),
+                "git" => {
+                    // cargo_src ids git packages as `cargo:<name>@<version>+git.<rev>`;
+                    // the embedded data has no revision, so match on the prefix.
+                    let prefix = format!("cargo:{}@{}+git", p.name, p.version);
+                    inv.components
+                        .keys()
+                        .find(|k| k.starts_with(&prefix))
+                        .cloned()
+                        .unwrap_or(prefix)
+                }
+                _ => format!("cargo:{}@{}+local", p.name, p.version),
+            }
+        })
+        .collect();
+
+    if cargo_scanned {
+        let mut only = Vec::new();
+        for (p, id) in pkgs.iter().zip(&ids) {
+            if p.root {
+                inv.root.evidence.insert("cargo-auditable".into());
+            } else if let Some(c) = inv.components.get_mut(id) {
+                c.evidence.insert("cargo-auditable".into());
+            } else {
+                only.push(format!("{}@{}", p.name, p.version));
+            }
+        }
+        if !only.is_empty() {
+            only.sort();
+            only.dedup();
+            inv.properties
+                .insert("sbom-attest:auditable-only".into(), only.join(", "));
+        }
+        return;
+    }
+
+    for (i, p) in pkgs.iter().enumerate() {
+        let id = ids[i].clone();
+        let mut c = Component::new(id.clone(), Kind::Library, &p.name);
+        c.version = Some(p.version.clone());
+        c.lang = Lang::Rust;
+        c.purl = Some(format!(
+            "pkg:cargo/{}@{}",
+            purl_escape(&p.name),
+            purl_escape(&p.version)
+        ));
+        c.scope = if p.build_only {
+            Scope::Excluded
+        } else {
+            Scope::Required
+        };
+        c.evidence.insert("cargo-auditable".into());
+        if p.root {
+            inv.root.evidence.insert("cargo-auditable".into());
+        } else {
+            inv.add(c);
+        }
+        for d in &p.deps {
+            if let Some(to) = ids.get(*d) {
+                inv.depend(&id, to);
+            }
+        }
     }
 }
 
@@ -317,6 +363,68 @@ mod tests {
         let info = analyze(&exe).unwrap();
         assert!(!info.format.is_empty());
         assert_eq!(info.sha256.len(), 64);
+    }
+
+    fn pkg(name: &str, source: &str, root: bool, deps: Vec<usize>) -> AuditablePkg {
+        AuditablePkg {
+            name: name.into(),
+            version: "1.0.0".into(),
+            source: source.into(),
+            build_only: false,
+            root,
+            deps,
+        }
+    }
+
+    #[test]
+    fn auditable_cross_checks_cargo_scan() {
+        let mut inv = Inventory::new(
+            Component::new("pkg:cargo/app@1.0.0", Kind::Application, "app"),
+            "2026-01-01T00:00:00Z".into(),
+        );
+        for id in ["pkg:cargo/serde@1.0.0", "cargo:kube@1.0.0+git.0123456789ab"] {
+            let mut c = Component::new(id, Kind::Library, "x");
+            c.evidence.insert("cargo-tree".into());
+            inv.add(c);
+        }
+        let pkgs = vec![
+            pkg("app", "local", true, vec![1, 2, 3]),
+            pkg("serde", "crates.io", false, vec![]),
+            pkg("kube", "git", false, vec![]),
+            pkg("proptest", "crates.io", false, vec![]),
+        ];
+        apply_auditable(&mut inv, &pkgs);
+        // no new components: the git package matched its cargo id, proptest is reported
+        assert_eq!(inv.components.len(), 2);
+        assert!(inv.components["cargo:kube@1.0.0+git.0123456789ab"]
+            .evidence
+            .contains("cargo-auditable"));
+        assert!(inv.components["pkg:cargo/serde@1.0.0"]
+            .evidence
+            .contains("cargo-auditable"));
+        assert!(inv.root.evidence.contains("cargo-auditable"));
+        assert_eq!(
+            inv.properties
+                .get("sbom-attest:auditable-only")
+                .map(String::as_str),
+            Some("proptest@1.0.0")
+        );
+    }
+
+    #[test]
+    fn auditable_alone_lists_everything() {
+        let mut inv = Inventory::new(
+            Component::new("src:app", Kind::Application, "app"),
+            "2026-01-01T00:00:00Z".into(),
+        );
+        let pkgs = vec![
+            pkg("app", "local", true, vec![1]),
+            pkg("serde", "crates.io", false, vec![]),
+        ];
+        apply_auditable(&mut inv, &pkgs);
+        assert!(inv.components.contains_key("pkg:cargo/serde@1.0.0"));
+        assert!(inv.deps["src:app"].contains("pkg:cargo/serde@1.0.0"));
+        assert!(!inv.properties.contains_key("sbom-attest:auditable-only"));
     }
 
     #[test]

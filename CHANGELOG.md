@@ -8,6 +8,14 @@
   SBOM carried those paths and hashes. Now those stay soname-only when no matching
   library is on the search path. `cc::elf_machine` is new and `cc::resolve_needed`
   takes the expected machine.
+- Fix: when `--binary` is combined with a cargo scan, the binary's cargo-auditable
+  list is now a cross-check instead of a second source of components. cargo-auditable
+  records the `cargo metadata` graph, which unifies features across the workspace and
+  can name crates that are never compiled in (on linkerd2-proxy: ring, proptest,
+  quickcheck, tokio-test and 17 more, none of them present in the binary's symbols).
+  Components found by both get the `cargo-auditable` evidence; crates only
+  cargo-auditable lists go into the `sbom-attest:auditable-only` document property.
+  Git dependencies now match their cargo-scan component instead of appearing twice.
 
 ## 0.2.0
 
