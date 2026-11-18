@@ -1,3 +1,4 @@
+#![cfg(feature = "cli")]
 //! End-to-end tests that run the sbom-attest binary.
 
 use serde_json::Value;

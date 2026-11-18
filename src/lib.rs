@@ -1,6 +1,35 @@
 //! # sbom-attest
 //!
-//! Build-time SBOMs for mixed Rust and C/C++ (including embedded) builds.
+//! Build-time SBOMs for mixed Rust and C/C++ (including embedded) builds, as a
+//! library and as the `sbom-attest` CLI.
+//!
+//! ## Use it as a library
+//!
+//! ```no_run
+//! let inv = sbom_attest::generate(&sbom_attest::GenerateOptions::cargo("Cargo.toml"))?;
+//! let cyclonedx = sbom_attest::to_cyclonedx(&inv); // serde_json::Value, CycloneDX 1.6
+//! let spdx = sbom_attest::to_spdx(&inv, "https://example.com/spdxdocs"); // SPDX 2.3
+//! sbom_attest::write("target/sbom.cdx.json", &sbom_attest::pretty(&cyclonedx))?;
+//! # let _ = spdx;
+//! # Ok::<(), anyhow::Error>(())
+//! ```
+//!
+//! With `default-features = false` the crate depends only on `anyhow`, `serde_json`
+//! and `sha2`. Optional features:
+//!
+//! | feature  | adds | extra deps |
+//! |----------|------|------------|
+//! | `sign`   | `sign` module: P-256 keys, cosign-compatible detached signatures, DSSE, JSF | `p256`, `rand_core`, `base64` |
+//! | `binary` | `binary` module: hash ELF/PE/Mach-O, read cargo-auditable data and `DT_NEEDED` | `goblin`, `miniz_oxide` |
+//! | `cli` (default) | the `sbom-attest` binary; enables `sign` and `binary` | `clap` |
+//!
+//! The stable surface is the items at the crate root: [`generate`],
+//! [`GenerateOptions`], [`CargoOptions`], [`Inventory`], [`to_cyclonedx`],
+//! [`to_spdx`], [`load_sbom`], [`check_minimum_elements`], [`diff_sboms`], [`write()`]
+//! and [`pretty`]. The modules stay public for advanced use and may change between
+//! minor versions.
+//!
+//! ## What it does
 //!
 //! - Rust components come from `cargo metadata` and `cargo tree` (so target-conditional
 //!   features are resolved for the real `--target`), with crate hashes from
@@ -16,6 +45,10 @@
 //!   in-toto / SLSA v1 provenance in a DSSE envelope; `bundle --profile dowi-8430`
 //!   writes a release evidence bundle indexed to DoWI 8430.01.
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
+#[cfg(feature = "binary")]
+#[cfg_attr(docsrs, doc(cfg(feature = "binary")))]
 pub mod binary;
 pub mod bundle;
 pub mod cargo_src;
@@ -25,15 +58,25 @@ pub mod check;
 pub mod model;
 pub mod provenance;
 pub mod read;
+#[cfg(feature = "sign")]
+#[cfg_attr(docsrs, doc(cfg(feature = "sign")))]
 pub mod sign;
 pub mod spdx;
 pub mod util;
 
+pub use cargo_src::CargoOptions;
+pub use check::{DiffReport, Element};
+pub use model::{Component, Inventory};
+pub use read::Doc;
+
 use anyhow::Result;
-use model::{Component, Inventory, Kind, Lang, Phase};
+use model::{Kind, Lang, Phase};
 use std::path::{Path, PathBuf};
 
-/// Everything `generate` needs.
+/// Everything [`generate`] needs. Every field is optional; build it with
+/// [`GenerateOptions::cargo`] or [`GenerateOptions::cc`] and the `with_*` methods, or
+/// with a struct literal ending in `..Default::default()` (fields may be added in
+/// minor releases).
 #[derive(Clone, Debug, Default)]
 pub struct GenerateOptions {
     pub cargo: Option<cargo_src::CargoOptions>,
@@ -51,6 +94,79 @@ pub struct GenerateOptions {
     pub author: Option<String>,
     pub timestamp: Option<i64>,
     pub memsafe: bool,
+}
+
+impl GenerateOptions {
+    /// Scan the Cargo project at `manifest_path` (a `Cargo.toml`).
+    pub fn cargo(manifest_path: impl Into<PathBuf>) -> Self {
+        GenerateOptions {
+            cargo: Some(CargoOptions::new(manifest_path)),
+            use_dpkg: true,
+            ..Default::default()
+        }
+    }
+
+    /// Scan a C/C++ build from its `compile_commands.json`, rooted at `project_root`.
+    pub fn cc(project_root: impl Into<PathBuf>, compile_commands: impl Into<PathBuf>) -> Self {
+        GenerateOptions {
+            project_root: Some(project_root.into()),
+            compile_commands: Some(compile_commands.into()),
+            use_dpkg: true,
+            ..Default::default()
+        }
+    }
+
+    /// Resolve Rust features and dependencies for this target triple.
+    pub fn with_target(mut self, triple: impl Into<String>) -> Self {
+        if let Some(c) = &mut self.cargo {
+            c.target = Some(triple.into());
+        }
+        self
+    }
+
+    /// The built artifact to hash and inspect (needs the `binary` feature).
+    pub fn with_binary(mut self, path: impl Into<PathBuf>) -> Self {
+        self.binary = Some(path.into());
+        self
+    }
+
+    /// Verbose build log (make VERBOSE=1, ninja -v) for link and archive lines.
+    pub fn with_build_log(mut self, path: impl Into<PathBuf>) -> Self {
+        self.build_log = Some(path.into());
+        self
+    }
+
+    /// A GNU ld / lld linker map; may be called more than once.
+    pub fn with_link_map(mut self, path: impl Into<PathBuf>) -> Self {
+        self.link_maps.push(path.into());
+        self
+    }
+
+    /// The organization producing the SBOM (CISA 2026 "SBOM Author").
+    pub fn with_author(mut self, author: impl Into<String>) -> Self {
+        self.author = Some(author.into());
+        self
+    }
+
+    /// The product's producer (CISA 2026 "Component Producer").
+    pub fn with_producer(mut self, producer: impl Into<String>) -> Self {
+        self.producer = Some(producer.into());
+        self
+    }
+
+    /// Product name and version (default: package name and version, or git describe).
+    pub fn with_product(mut self, name: impl Into<String>, version: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self.version = Some(version.into());
+        self
+    }
+
+    /// Fixed SBOM timestamp as Unix seconds, for reproducible output
+    /// (default: `SOURCE_DATE_EPOCH`, else now).
+    pub fn with_timestamp(mut self, unix_secs: i64) -> Self {
+        self.timestamp = Some(unix_secs);
+        self
+    }
 }
 
 fn git_describe(dir: &Path) -> Option<String> {
@@ -187,6 +303,11 @@ pub fn generate(o: &GenerateOptions) -> Result<Inventory> {
             },
         )?;
     }
+    #[cfg(not(feature = "binary"))]
+    if o.binary.is_some() {
+        anyhow::bail!("reading a built artifact needs the `binary` feature of sbom-attest");
+    }
+    #[cfg(feature = "binary")]
     if let Some(b) = &o.binary {
         let info = binary::analyze(b)?;
         binary::apply(&mut inv, b, &info);
@@ -218,8 +339,39 @@ pub fn generate(o: &GenerateOptions) -> Result<Inventory> {
     Ok(inv)
 }
 
+/// The inventory as a CycloneDX 1.6 JSON document.
+pub fn to_cyclonedx(inv: &Inventory) -> serde_json::Value {
+    cdx::document(inv)
+}
+
+/// The inventory as an SPDX 2.3 JSON document. `namespace_base` is the URI the
+/// `documentNamespace` starts with, e.g. `https://spdx.org/spdxdocs`.
+pub fn to_spdx(inv: &Inventory, namespace_base: &str) -> serde_json::Value {
+    spdx::document(inv, namespace_base)
+}
+
+/// Read a CycloneDX or SPDX JSON file (any producer) into a format-neutral [`Doc`],
+/// returning the raw JSON as well.
+pub fn load_sbom(path: impl AsRef<Path>) -> Result<(Doc, serde_json::Value)> {
+    read::load(path.as_ref())
+}
+
+/// Score a document against the CISA 2026 SBOM minimum elements. Pass
+/// `detached_signature = true` when a detached signature over the file verified.
+/// [`check::score`] turns the result into 0-100.
+pub fn check_minimum_elements(doc: &Doc, detached_signature: bool) -> Vec<Element> {
+    check::minimum_elements(doc, detached_signature)
+}
+
+/// Compare a vendor SBOM with an independently generated one: undeclared,
+/// unverified and version- or hash-mismatched components.
+pub fn diff_sboms(vendor: &Doc, independent: &Doc) -> DiffReport {
+    check::diff(vendor, independent)
+}
+
 /// Write `data` to `path`, creating parent directories.
-pub fn write(path: &Path, data: &[u8]) -> Result<()> {
+pub fn write(path: impl AsRef<Path>, data: &[u8]) -> Result<()> {
+    let path = path.as_ref();
     if let Some(p) = path.parent() {
         if !p.as_os_str().is_empty() {
             std::fs::create_dir_all(p)?;

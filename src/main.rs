@@ -287,7 +287,7 @@ fn write_sboms(
         let bytes = pretty(&doc);
         write(path, &bytes)?;
         if let Some(sk) = &sk {
-            write(&sibling_sig(path), sign::sign_blob(sk, &bytes).as_bytes())?;
+            write(sibling_sig(path), sign::sign_blob(sk, &bytes).as_bytes())?;
         }
         eprintln!(
             "wrote {} ({} components)",
@@ -301,7 +301,7 @@ fn write_sboms(
         let bytes = pretty(&doc);
         write(path, &bytes)?;
         if let Some(sk) = &sk {
-            write(&sibling_sig(path), sign::sign_blob(sk, &bytes).as_bytes())?;
+            write(sibling_sig(path), sign::sign_blob(sk, &bytes).as_bytes())?;
         }
         eprintln!("wrote {}", path.display());
     }
@@ -573,7 +573,7 @@ fn run_bundle(
         "detached ECDSA P-256 signature".into(),
     )?;
     write(
-        &out.join("signing-key.pub"),
+        out.join("signing-key.pub"),
         sign::public_pem(&sk)?.as_bytes(),
     )?;
     add(
@@ -585,11 +585,11 @@ fn run_bundle(
     let doc = read::from_cyclonedx(&cdx_doc);
     let el = check::minimum_elements(&doc, true);
     write(
-        &out.join("min-elements.json"),
+        out.join("min-elements.json"),
         &pretty(&check::elements_json(&el)),
     )?;
     write(
-        &out.join("min-elements.md"),
+        out.join("min-elements.md"),
         check::elements_markdown(&el).as_bytes(),
     )?;
     add(
@@ -611,9 +611,9 @@ fn run_bundle(
         )?;
         let (vd, _) = read::load(v)?;
         let r = check::diff(&vd, &doc);
-        write(&out.join("sbom-diff.json"), &pretty(&r.to_json()))?;
+        write(out.join("sbom-diff.json"), &pretty(&r.to_json()))?;
         write(
-            &out.join("sbom-diff.md"),
+            out.join("sbom-diff.md"),
             r.to_markdown("vendor-sbom.json", "sbom.cdx.json")
                 .as_bytes(),
         )?;
@@ -696,7 +696,7 @@ fn run_bundle(
         finished: inv.timestamp.clone(),
     })?;
     write(
-        &out.join("provenance.intoto.json"),
+        out.join("provenance.intoto.json"),
         &pretty(&sign::dsse_sign(
             &sk,
             sign::DSSE_INTOTO,
@@ -710,7 +710,7 @@ fn run_bundle(
     )?;
     let sst = provenance::sbom_statement(&subjects, &cdx_doc)?;
     write(
-        &out.join("sbom.intoto.json"),
+        out.join("sbom.intoto.json"),
         &pretty(&sign::dsse_sign(
             &sk,
             sign::DSSE_INTOTO,
@@ -729,12 +729,12 @@ fn run_bundle(
     });
     let idx = bundle::index(&entries, marking, &root, details);
     let idx_bytes = pretty(&idx);
-    write(&out.join("index.json"), &idx_bytes)?;
+    write(out.join("index.json"), &idx_bytes)?;
     write(
-        &out.join("index.json.sig"),
+        out.join("index.json.sig"),
         sign::sign_blob(&sk, &idx_bytes).as_bytes(),
     )?;
-    write(&out.join("INDEX.md"), bundle::markdown(&idx).as_bytes())?;
+    write(out.join("INDEX.md"), bundle::markdown(&idx).as_bytes())?;
 
     // SHA256SUMS over everything in the bundle
     let mut files = Vec::new();
@@ -755,7 +755,7 @@ fn run_bundle(
     for f in &files {
         sums.push_str(&format!("{}  {}\n", util::sha256_file(&out.join(f))?, f));
     }
-    write(&out.join("SHA256SUMS"), sums.as_bytes())?;
+    write(out.join("SHA256SUMS"), sums.as_bytes())?;
     let gaps = idx["gaps"].as_array().map(|a| a.len()).unwrap_or(0);
     eprintln!(
         "wrote evidence bundle {} ({} files, {} core gaps)",

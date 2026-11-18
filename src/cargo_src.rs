@@ -15,6 +15,8 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+/// How to run `cargo metadata` / `cargo tree`. Build it with [`CargoOptions::new`]
+/// or a struct literal ending in `..Default::default()`.
 #[derive(Clone, Debug, Default)]
 pub struct CargoOptions {
     pub manifest_path: PathBuf,
@@ -28,6 +30,14 @@ pub struct CargoOptions {
 }
 
 impl CargoOptions {
+    /// Options for the Cargo project at `manifest_path`, everything else default.
+    pub fn new(manifest_path: impl Into<PathBuf>) -> Self {
+        CargoOptions {
+            manifest_path: manifest_path.into(),
+            ..Default::default()
+        }
+    }
+
     fn common(&self, cmd: &mut Command) {
         cmd.arg("--manifest-path").arg(&self.manifest_path);
         if !self.features.is_empty() {

@@ -1,6 +1,6 @@
 [package]
 name = "sbom-attest"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 rust-version = "1.85"
 description = "Build-time SBOMs for mixed Rust and C/C++ embedded builds: CycloneDX 1.6 and SPDX 2.3 with the CISA 2026 minimum elements, vendor-vs-independent SBOM diff, signed in-toto/SLSA provenance and a DoWI 8430.01 evidence bundle"
@@ -11,22 +11,48 @@ readme = "README.md"
 keywords = ["sbom", "cyclonedx", "spdx", "slsa", "in-toto"]
 categories = ["command-line-utilities", "development-tools", "embedded"]
 authors = ["Matt Busel <matt@busel.dev>"]
-exclude = ["/tests", "/ci", "/.github"]
+exclude = ["/tests", "/ci", "/.github", "/target"]
+autoexamples = false
 
 [[bin]]
 name = "sbom-attest"
 path = "src/main.rs"
+required-features = ["cli"]
+
+[[example]]
+name = "cargo_sbom"
+
+[[example]]
+name = "sign_sbom"
+required-features = ["sign"]
+
+[features]
+# The CLI and both optional capabilities are on by default, so `cargo install
+# sbom-attest` behaves as before. Library users who only need SBOM generation
+# can depend on it with `default-features = false` (anyhow, serde_json, sha2).
+default = ["cli"]
+# The `sbom-attest` binary (adds clap).
+cli = ["dep:clap", "sign", "binary"]
+# ECDSA P-256 signing: detached signatures, DSSE envelopes, JSF (adds p256, base64).
+sign = ["dep:p256", "dep:rand_core", "dep:base64"]
+# Reading built artifacts: ELF/PE/Mach-O hashing, cargo-auditable data and the
+# shared-library list (adds goblin, miniz_oxide).
+binary = ["dep:goblin", "dep:miniz_oxide"]
 
 [dependencies]
 anyhow = "1"
-base64 = "0.22"
-clap = { version = "4.5", features = ["derive"] }
-goblin = "0.9"
-miniz_oxide = "0.8"
-p256 = { version = "0.13", features = ["ecdsa", "pem", "pkcs8"] }
-rand_core = { version = "0.6", features = ["getrandom"] }
 serde_json = "1"
 sha2 = "0.10"
+base64 = { version = "0.22", optional = true }
+clap = { version = "4.5", features = ["derive"], optional = true }
+goblin = { version = "0.9", optional = true }
+miniz_oxide = { version = "0.8", optional = true }
+p256 = { version = "0.13", features = ["ecdsa", "pem", "pkcs8"], optional = true }
+rand_core = { version = "0.6", features = ["getrandom"], optional = true }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 [profile.release]
 lto = true

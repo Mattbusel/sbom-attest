@@ -207,7 +207,7 @@ pub fn document(inv: &Inventory) -> Value {
         }],
     });
     // the serial number is derived from the content, so identical builds get identical SBOMs
-    let seed = crate::sign::canonical(&doc);
+    let seed = crate::util::canonical(&doc);
     doc["serialNumber"] = json!(format!("urn:uuid:{}", uuid_from(&seed)));
     doc
 }

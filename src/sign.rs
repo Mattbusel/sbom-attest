@@ -6,7 +6,9 @@ use anyhow::{anyhow, bail, Context, Result};
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine;
 use p256::ecdsa::signature::{Signer, Verifier};
-use p256::ecdsa::{DerSignature, Signature, SigningKey, VerifyingKey};
+use p256::ecdsa::{DerSignature, Signature};
+/// Re-exported so callers do not need their own `p256` dependency.
+pub use p256::ecdsa::{SigningKey, VerifyingKey};
 use p256::pkcs8::{
     DecodePrivateKey, DecodePublicKey, EncodePrivateKey, EncodePublicKey, LineEnding,
 };
@@ -35,10 +37,15 @@ pub fn load_signing_key(spec: &str) -> Result<SigningKey> {
         Some(var) => std::env::var(var).with_context(|| format!("environment variable {var}"))?,
         None => std::fs::read_to_string(spec).with_context(|| format!("reading key {spec}"))?,
     };
+    signing_key_from_pem(&pem)
+}
+
+/// Parse an unencrypted PKCS#8 P-256 private key PEM (what [`keygen`] returns).
+pub fn signing_key_from_pem(pem: &str) -> Result<SigningKey> {
     if pem.contains("ENCRYPTED") {
         bail!("encrypted keys are not supported; use an unencrypted PKCS#8 P-256 key (sbom-attest keygen)");
     }
-    SigningKey::from_pkcs8_pem(&pem).map_err(|e| anyhow!("not a PKCS#8 P-256 private key: {e}"))
+    SigningKey::from_pkcs8_pem(pem).map_err(|e| anyhow!("not a PKCS#8 P-256 private key: {e}"))
 }
 
 pub fn load_verifying_key(path: &Path) -> Result<VerifyingKey> {
@@ -132,34 +139,7 @@ pub fn dsse_verify(vk: &VerifyingKey, env: &Value) -> Result<Vec<u8>> {
     bail!("no DSSE signature verifies with this key")
 }
 
-/// RFC 8785 (JCS) canonical form. serde_json's default map is sorted by key and its
-/// string escaping matches JCS for the integer-only documents written here.
-pub fn canonical(v: &Value) -> Vec<u8> {
-    fn sort(v: &Value) -> Value {
-        match v {
-            Value::Object(m) => {
-                let mut keys: Vec<&String> = m.keys().collect();
-                // JCS orders by UTF-16 code units; identical to byte order for ASCII keys
-                keys.sort_by(|a, b| a.encode_utf16().cmp(b.encode_utf16()));
-                let mut out = serde_json::Map::new();
-                for k in keys {
-                    out.insert(k.clone(), sort(&m[k]));
-                }
-                Value::Object(out)
-            }
-            Value::Array(a) => Value::Array(a.iter().map(sort).collect()),
-            // JCS writes numbers the way ECMAScript does: 1.0 is "1"
-            Value::Number(n) if n.is_f64() => match n.as_f64() {
-                Some(f) if f.fract() == 0.0 && f.abs() < 9_007_199_254_740_992.0 => {
-                    Value::from(f as i64)
-                }
-                _ => v.clone(),
-            },
-            other => other.clone(),
-        }
-    }
-    serde_json::to_vec(&sort(v)).unwrap_or_default()
-}
+pub use crate::util::canonical;
 
 fn jwk(vk: &VerifyingKey) -> Value {
     let point = vk.to_encoded_point(false);

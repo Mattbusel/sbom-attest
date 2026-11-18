@@ -75,6 +75,26 @@ cosign verify-blob-attestation --key release.pub --signature provenance.intoto.j
   --type slsaprovenance1 --insecure-ignore-tlog=true build/firmware.elf
 ```
 
+## Use it as a library
+
+Generate SBOMs from your own build tool, xtask or release script:
+
+```toml
+[dependencies]
+sbom-attest = { version = "0.2", default-features = false }  # anyhow, serde_json, sha2 only
+```
+
+```rust
+let inv = sbom_attest::generate(&sbom_attest::GenerateOptions::cargo("Cargo.toml"))?;
+sbom_attest::write("target/sbom.cdx.json", &sbom_attest::pretty(&sbom_attest::to_cyclonedx(&inv)))?;
+sbom_attest::write("target/sbom.spdx.json", &sbom_attest::pretty(&sbom_attest::to_spdx(&inv, "https://spdx.org/spdxdocs")))?;
+```
+
+Features: `sign` (P-256, DSSE, JSF, cosign-compatible signatures), `binary` (read
+ELF/PE/Mach-O, cargo-auditable data) and `cli` (the binary; default). See
+[docs/library.md](docs/library.md) for the full API, C/C++ inputs, signing and CI
+recipes, and [examples/](examples/).
+
 ## CISA 2026 minimum elements
 
 | Element | CycloneDX 1.6 | SPDX 2.3 |
@@ -172,6 +192,10 @@ decides. Missing evidence for the core paragraphs is listed under `gaps`.
   with a `links` key) and C, C++ and assembly `false`. It is a language property, not
   an analysis.
 
-## License
+## MSRV and license
 
-MIT OR Apache-2.0
+Minimum supported Rust version: 1.85 (checked in CI). Raising it is a minor-version
+change.
+
+MIT OR Apache-2.0. Maintained by Matt Busel ([Tensorust](https://tensorust.com));
+issues and PRs welcome.

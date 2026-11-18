@@ -21,12 +21,34 @@ jobs:
           components: clippy, rustfmt
       - run: cargo fmt --check
       - run: cargo clippy --all-targets --locked -- -D warnings
+  features:
+    # the library must build, lint and test with every optional feature off
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        features: ["--no-default-features", "--no-default-features --features sign", "--no-default-features --features binary"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - run: cargo clippy --all-targets --locked ${{ matrix.features }} -- -D warnings
+      - run: cargo test --locked ${{ matrix.features }}
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: cargo doc --no-deps --all-features --locked
+        env:
+          RUSTDOCFLAGS: --cfg docsrs -D warnings
   msrv:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@1.85
       - run: cargo build --locked
+      - run: cargo build --locked --lib --no-default-features
   conformance:
     # CycloneDX 1.6 schema + cyclonedx-cli, pyspdxtools, sbomqs CISA 2026 gate,
     # differential vs cargo-cyclonedx 0.5.10 and syft, reproducibility, cosign verification

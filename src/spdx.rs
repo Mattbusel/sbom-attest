@@ -166,7 +166,7 @@ pub fn document(inv: &Inventory, namespace_base: &str) -> Value {
         "packages": packages,
         "relationships": rels,
     });
-    let seed = crate::sign::canonical(&doc);
+    let seed = crate::util::canonical(&doc);
     doc["documentNamespace"] = json!(format!(
         "{}/{}-{}",
         namespace_base.trim_end_matches('/'),

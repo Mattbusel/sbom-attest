@@ -38,7 +38,7 @@ pub fn sha256_file(path: &Path) -> Result<String> {
     Ok(hex(&h.finalize()))
 }
 
-/// Digest of a set of files: SHA-256 over sorted "<relpath>\0<sha256>\n" lines.
+/// Digest of a set of files: SHA-256 over sorted `"<relpath>\0<sha256>\n"` lines.
 /// Order and absolute location do not matter, so two checkouts give the same value.
 pub fn tree_digest(files: &[(String, String)]) -> String {
     let mut v: Vec<&(String, String)> = files.iter().collect();
@@ -301,6 +301,36 @@ pub fn spdx_expression_known(expr: &str) -> bool {
         }
     }
     any && !expect_exception
+}
+
+/// RFC 8785 (JCS) canonical form. serde_json's default map is sorted by key and its
+/// string escaping matches JCS for the integer-only documents written here.
+pub fn canonical(v: &serde_json::Value) -> Vec<u8> {
+    use serde_json::Value;
+    fn sort(v: &Value) -> Value {
+        match v {
+            Value::Object(m) => {
+                let mut keys: Vec<&String> = m.keys().collect();
+                // JCS orders by UTF-16 code units; identical to byte order for ASCII keys
+                keys.sort_by(|a, b| a.encode_utf16().cmp(b.encode_utf16()));
+                let mut out = serde_json::Map::new();
+                for k in keys {
+                    out.insert(k.clone(), sort(&m[k]));
+                }
+                Value::Object(out)
+            }
+            Value::Array(a) => Value::Array(a.iter().map(sort).collect()),
+            // JCS writes numbers the way ECMAScript does: 1.0 is "1"
+            Value::Number(n) if n.is_f64() => match n.as_f64() {
+                Some(f) if f.fract() == 0.0 && f.abs() < 9_007_199_254_740_992.0 => {
+                    Value::from(f as i64)
+                }
+                _ => v.clone(),
+            },
+            other => other.clone(),
+        }
+    }
+    serde_json::to_vec(&sort(v)).unwrap_or_default()
 }
 
 #[cfg(test)]
