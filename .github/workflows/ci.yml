@@ -42,6 +42,17 @@ jobs:
       - run: cargo doc --no-deps --all-features --locked
         env:
           RUSTDOCFLAGS: --cfg docsrs -D warnings
+  audit-self:
+    # dogfood the Action: the SBOM this crate generates for itself must pass its own audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo install --path . --locked
+      - run: sbom-attest generate --locked --cdx sbom.cdx.json
+      - uses: ./
+        with:
+          sbom: sbom.cdx.json
   msrv:
     runs-on: ubuntu-latest
     steps:

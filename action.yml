@@ -1,0 +1,83 @@
+name: sbom-attest audit
+description: Fail the build when your published SBOM does not match what the build links (omitted, phantom, drifted, unpinned or yanked dependencies, missing licenses, unnamed vendored C/C++).
+author: Tensorust
+branding:
+  icon: shield
+  color: red
+
+inputs:
+  sbom:
+    description: Path to the SBOM you publish (CycloneDX or SPDX JSON).
+    required: true
+  manifest-path:
+    description: Cargo.toml of the build the SBOM describes.
+    required: false
+    default: Cargo.toml
+  package:
+    description: Workspace package the SBOM describes (default: the whole workspace).
+    required: false
+    default: ""
+  target:
+    description: "Target the SBOM describes: auto (what the SBOM records, else the host), a triple, all or host."
+    required: false
+    default: auto
+  features:
+    description: Cargo features the release is built with (comma separated).
+    required: false
+    default: ""
+  waive:
+    description: "Checks to skip, comma separated. Every waiver is printed and written into the report. Leave empty to enforce all of them."
+    required: false
+    default: ""
+  args:
+    description: Extra arguments for `sbom-attest audit` (e.g. --binary target/release/app, --compile-commands build/compile_commands.json).
+    required: false
+    default: ""
+  version:
+    description: sbom-attest version to install.
+    required: false
+    default: "0.3.0"
+
+outputs:
+  result:
+    description: pass or fail
+    value: ${{ steps.audit.outputs.result }}
+  report:
+    description: Path of the JSON report.
+    value: ${{ steps.audit.outputs.report }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install sbom-attest
+      shell: bash
+      run: |
+        if ! command -v sbom-attest >/dev/null || ! sbom-attest --version | grep -q " ${{ inputs.version }}$"; then
+          cargo install sbom-attest --version "${{ inputs.version }}" --locked
+        fi
+    - name: Audit the SBOM against the build
+      id: audit
+      shell: bash
+      env:
+        SBOM: ${{ inputs.sbom }}
+        MANIFEST: ${{ inputs.manifest-path }}
+        PACKAGE: ${{ inputs.package }}
+        TARGET: ${{ inputs.target }}
+        FEATURES: ${{ inputs.features }}
+        WAIVE: ${{ inputs.waive }}
+        EXTRA: ${{ inputs.args }}
+      run: |
+        set +e
+        report="$RUNNER_TEMP/sbom-attest-audit.json"
+        cmd=(sbom-attest audit "$SBOM" --manifest-path "$MANIFEST" --target "$TARGET" --json "$report")
+        [ -n "$PACKAGE" ] && cmd+=(--package "$PACKAGE")
+        [ -n "$FEATURES" ] && cmd+=(--features "$FEATURES")
+        [ -n "$WAIVE" ] && cmd+=(--waive "$WAIVE")
+        [ -n "$GITHUB_STEP_SUMMARY" ] && cmd+=(--summary "$GITHUB_STEP_SUMMARY")
+        # shellcheck disable=SC2206
+        extra=($EXTRA)
+        "${cmd[@]}" "${extra[@]}"
+        code=$?
+        echo "report=$report" >> "$GITHUB_OUTPUT"
+        if [ "$code" = 0 ]; then echo "result=pass" >> "$GITHUB_OUTPUT"; else echo "result=fail" >> "$GITHUB_OUTPUT"; fi
+        exit $code

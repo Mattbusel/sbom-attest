@@ -131,3 +131,28 @@ The `.sig` file verifies with
   project and a CISA 2026 score. `cargo run --example cargo_sbom --no-default-features -- Cargo.toml`
 - [`examples/sign_sbom.rs`](../examples/sign_sbom.rs): JSF + detached signature.
   `cargo run --example sign_sbom --no-default-features --features sign -- Cargo.toml`
+
+## Auditing a published SBOM
+
+```rust
+use sbom_attest::audit;
+let (doc, raw) = sbom_attest::load_sbom("dist/app.cdx.json")?;
+let lock = std::fs::read_to_string("Cargo.lock")?;
+let mut truth = audit::Truth {
+    lock: Some(("Cargo.lock".into(), audit::parse_lock(&lock))),
+    ..Default::default()
+};
+let mut graph = audit::GraphOptions { manifest_path: "Cargo.toml".into(), ..Default::default() };
+graph.target = audit::recorded_target(&raw); // what the SBOM says it describes
+truth.graph = Some(("cargo tree".into(), audit::cargo_graph(&graph)?));
+truth.vendored = audit::scan_vendored(std::path::Path::new("."));
+let index = audit::fetch_index(&audit::crates_io_names(&doc, &truth), "https://index.crates.io");
+let report = audit::audit(
+    "dist/app.cdx.json",
+    &doc,
+    &truth,
+    index.as_ref().map_err(|e| e.to_string()),
+    &audit::AuditOptions::default(), // nothing waived: every check can fail
+);
+assert!(report.passed(), "{}", report.to_markdown());
+```

@@ -1,17 +1,17 @@
 [package]
 name = "sbom-attest"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 rust-version = "1.85"
-description = "Your SBOM probably describes a build you didn't ship. Build-time SBOMs for mixed Rust and C/C++ embedded builds: CycloneDX 1.6 and SPDX 2.3 with the CISA 2026 minimum elements, vendor-vs-independent diff, signed in-toto/SLSA provenance, DoWI 8430.01 evidence bundle."
+description = "Your SBOM is a lie until the build proves it. sbom-attest audit fails CI when a published SBOM disagrees with Cargo.lock, the compiled crate graph or vendored C/C++; also build-time CycloneDX/SPDX SBOMs, vendor diff, signed SLSA provenance"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Mattbusel/sbom-attest"
 documentation = "https://docs.rs/sbom-attest"
 readme = "README.md"
-keywords = ["sbom", "cyclonedx", "spdx", "slsa", "in-toto"]
+keywords = ["sbom", "cyclonedx", "spdx", "supply-chain", "audit"]
 categories = ["command-line-utilities", "development-tools", "embedded"]
 authors = ["Matt Busel <matt@busel.dev>"]
-exclude = ["/tests", "/ci", "/.github", "/target"]
+exclude = ["/tests", "/ci", "/.github", "/target", "/action.yml", "/reports", "/*__*/", "/_*/"]
 autoexamples = false
 
 [[bin]]

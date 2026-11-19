@@ -47,6 +47,7 @@
 
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+pub mod audit;
 #[cfg(feature = "binary")]
 #[cfg_attr(docsrs, doc(cfg(feature = "binary")))]
 pub mod binary;
@@ -64,6 +65,7 @@ pub mod sign;
 pub mod spdx;
 pub mod util;
 
+pub use audit::{AuditOptions, AuditReport, Class, Finding, Truth};
 pub use cargo_src::CargoOptions;
 pub use check::{DiffReport, Element};
 pub use model::{Component, Inventory};

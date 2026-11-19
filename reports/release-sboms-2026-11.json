@@ -1,0 +1,2864 @@
+{
+ "generated": "2026-11-19",
+ "tool": "sbom-attest 0.3.0 (`sbom-attest audit`), https://github.com/Mattbusel/sbom-attest",
+ "method": "Each project's latest release SBOM asset was downloaded from its GitHub release and audited against the release tag's own Cargo.lock and the crate graph cargo tree resolves (run B: the target the SBOM records, else x86_64-unknown-linux-gnu, default features). Phantoms are only counted as robust when they are also outside the --all-features --target all graph (run A). vendored-c = a -sys/-src crate in the graph compiles a C library from source and no SBOM component names that library. yanked = checked against the crates.io sparse index on 2026-11-19.",
+ "targets_audited": 32,
+ "targets_failing": 32,
+ "projects_with_finding": {
+  "phantom": 29,
+  "yanked": 19,
+  "no-license": 16,
+  "vendored-c": 23,
+  "omitted-build": 15,
+  "omitted": 9,
+  "unpinned": 7,
+  "unhashed": 10,
+  "version-drift": 5
+ },
+ "targets": [
+  {
+   "repo": "66HEX/frame",
+   "stars": 2321,
+   "release": "0.35.0",
+   "commit": "9b584c454213a988271c525a29e0d7936fbddca1",
+   "sbom_asset": "https://github.com/66HEX/frame/releases/download/0.35.0/Frame.cdx.json",
+   "sbom_file": "Frame.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 782,
+   "checked_against": [
+    "cargo tree -e normal,build -p frame-app --target all (740 crates)",
+    "Cargo.lock at the release tag (792 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 47,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 0,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 43,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 1,
+    "no-license": 3
+   },
+   "phantom_feature_and_platform_robust": 43,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "bit-set 0.11.1",
+    "bit-vec 0.10.1",
+    "block2 0.5.1",
+    "borsh 1.7.0",
+    "borsh-derive 1.7.0",
+    "convert_case 0.11.0",
+    "lru-slab 0.1.2",
+    "objc2-core-data 0.2.2",
+    "objc2-core-image 0.2.2",
+    "objc2-core-video 0.3.2",
+    "objc2-metal 0.2.2",
+    "objc2-quartz-core 0.2.2",
+    "proptest 1.12.0",
+    "proptest-macro 0.6.0",
+    "quick-error 1.2.3"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "yanked",
+     "component": "spin",
+     "version": "0.9.8",
+     "detail": "spin 0.9.8 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/66HEX/frame/blob/9b584c454213a988271c525a29e0d7936fbddca1/Cargo.lock#L5904",
+     "registry": "https://index.crates.io/sp/in/spin",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package frame-app",
+   "scope_note": null
+  },
+  {
+   "repo": "Epistates/turbovault",
+   "stars": 158,
+   "release": "v4.1.0",
+   "commit": "add65071a1b5a2506c8e38b5fe53ccc0403616be",
+   "sbom_asset": "https://github.com/Epistates/turbovault/releases/download/v4.1.0/turbovault-v4.1.0.cdx.json",
+   "sbom_file": "turbovault-v4.1.0.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 583,
+   "checked_against": [
+    "cargo tree -e normal,build -p turbovault --target all (371 crates)",
+    "Cargo.lock at the release tag (627 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 215,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 2,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 213,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 0,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 28,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "borsh 1.8.1",
+    "borsh-derive 1.8.1",
+    "bs58 0.5.1",
+    "bstr 1.13.1",
+    "bytecheck 0.8.3",
+    "bytecheck_derive 0.8.3",
+    "hashbrown 0.12.3",
+    "indexmap 1.9.3",
+    "jiff-tzdb 0.1.10",
+    "jiff-tzdb-platform 0.1.3",
+    "lru-slab 0.1.3",
+    "munge 0.4.7",
+    "munge_macro 0.4.7",
+    "ptr_meta 0.3.2",
+    "ptr_meta_derive 0.3.2"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "libgit2",
+     "version": "1.9.7",
+     "detail": "crate libgit2-sys 0.18.8+1.9.7 links it: its bundled source, or the system library when the build host has one; no SBOM component names libgit2",
+     "evidence": "https://github.com/Epistates/turbovault/blob/add65071a1b5a2506c8e38b5fe53ccc0403616be/Cargo.lock#L2469",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.3+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/Epistates/turbovault/blob/add65071a1b5a2506c8e38b5fe53ccc0403616be/Cargo.lock#L6615",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package turbovault",
+   "scope_note": null
+  },
+  {
+   "repo": "MAIF/yozefu",
+   "stars": 355,
+   "release": "v0.0.32",
+   "commit": "2934c8dcee85824fb0793bfa39615b28a8ee8caf",
+   "sbom_asset": "https://github.com/MAIF/yozefu/releases/download/v0.0.32/yozefu-x86_64-unknown-linux-gnu.cdx.json",
+   "sbom_file": "yozefu-x86_64-unknown-linux-gnu.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 535,
+   "checked_against": [
+    "cargo tree -e normal,build --workspace --target x86_64-unknown-linux-gnu (463 crates)",
+    "Cargo.lock at the release tag (724 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 86,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 2,
+    "vendored-c": 7,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 76,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 1,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 69,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "aho-corasick 1.1.5",
+    "approx 0.5.1",
+    "atomic 0.6.1",
+    "bit-set 0.5.3",
+    "bit-vec 0.6.3",
+    "bitflags 1.3.2",
+    "by_address 1.2.1",
+    "cfg_aliases 0.2.2",
+    "chacha20 0.10.1",
+    "cpufeatures 0.3.0",
+    "crossterm 0.28.1",
+    "csscolorparser 0.6.2",
+    "deltae 0.3.2",
+    "embedded-io 0.4.0",
+    "embedded-io 0.6.1"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.44.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/MAIF/yozefu/blob/2934c8dcee85824fb0793bfa39615b28a8ee8caf/Cargo.lock#L250",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "curl",
+     "version": "8.21.0",
+     "detail": "crate curl-sys 0.4.90+curl-8.21.0 compiles it from source; no SBOM component names curl",
+     "evidence": "https://github.com/MAIF/yozefu/blob/2934c8dcee85824fb0793bfa39615b28a8ee8caf/Cargo.lock#L1322",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zlib",
+     "version": null,
+     "detail": "crate libz-sys 1.1.29 compiles it from source; no SBOM component names zlib",
+     "evidence": "https://github.com/MAIF/yozefu/blob/2934c8dcee85824fb0793bfa39615b28a8ee8caf/Cargo.lock#L2841",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "lz4",
+     "version": "1.10.0",
+     "detail": "crate lz4-sys 1.11.1+lz4-1.10.0 compiles it from source; no SBOM component names lz4",
+     "evidence": "https://github.com/MAIF/yozefu/blob/2934c8dcee85824fb0793bfa39615b28a8ee8caf/Cargo.lock#L2922",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "openssl",
+     "version": "3.6.3",
+     "detail": "crate openssl-src 300.6.1+3.6.3 compiles it from source; no SBOM component names openssl",
+     "evidence": "https://github.com/MAIF/yozefu/blob/2934c8dcee85824fb0793bfa39615b28a8ee8caf/Cargo.lock#L3450",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "librdkafka",
+     "version": "2.12.1",
+     "detail": "crate rdkafka-sys 4.10.0+2.12.1 compiles it from source; no SBOM component names librdkafka",
+     "evidence": "https://github.com/MAIF/yozefu/blob/2934c8dcee85824fb0793bfa39615b28a8ee8caf/Cargo.lock#L4341",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.0.16+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/MAIF/yozefu/blob/2934c8dcee85824fb0793bfa39615b28a8ee8caf/Cargo.lock#L7628",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "chacha20",
+     "version": "0.10.1",
+     "detail": "chacha20 0.10.1 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/MAIF/yozefu/blob/2934c8dcee85824fb0793bfa39615b28a8ee8caf/Cargo.lock#L739",
+     "registry": "https://index.crates.io/ch/ac/chacha20",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": "The SBOM names no workspace package, so the whole workspace was the reference; omitted, version-drift and vendored-c counts may include crates only other members use; omitted and version-drift are left out of the headline."
+  },
+  {
+   "repo": "MinBZK/nl-wallet",
+   "stars": 276,
+   "release": "v0.7.2",
+   "commit": "92a40d02e4b9807570d76cf7510a4edb88893fbe",
+   "sbom_asset": "https://github.com/MinBZK/nl-wallet/releases/download/v0.7.2/wallet-sbom-prod_v0.7.2_generic.zip",
+   "sbom_file": "bom-prod.json",
+   "sbom_generator": "pnpm 12.17.0",
+   "sbom_components": 1424,
+   "checked_against": [
+    "cargo tree -e normal,build --workspace --target x86_64-unknown-linux-gnu (740 crates)",
+    "Cargo.lock at the release tag (1009 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 792,
+   "counts": {
+    "omitted": 26,
+    "omitted-build": 23,
+    "vendored-c": 3,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 91,
+    "unpinned": 4,
+    "unhashed": 0,
+    "yanked": 0,
+    "no-license": 645
+   },
+   "phantom_feature_and_platform_robust": 67,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "aligned 0.4.3",
+    "aligned-vec 0.6.4",
+    "arg_enum_proc_macro 0.3.4",
+    "arrayvec 0.7.6",
+    "as-slice 0.2.1",
+    "av-scenechange 0.14.1",
+    "av1-grain 0.2.5",
+    "avif-serialize 0.8.9",
+    "bigdecimal 0.4.9",
+    "bit_field 0.10.3",
+    "bitstream-io 4.10.0",
+    "bs58 0.5.1",
+    "bytecheck 0.6.12",
+    "bytecheck_derive 0.6.12",
+    "difflib 0.4.0"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.39.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/MinBZK/nl-wallet/blob/92a40d02e4b9807570d76cf7510a4edb88893fbe/wallet_core/Cargo.lock#L910",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "libgit2",
+     "version": "1.9.4",
+     "detail": "crate libgit2-sys 0.18.5+1.9.4 links it: its bundled source, or the system library when the build host has one; no SBOM component names libgit2",
+     "evidence": "https://github.com/MinBZK/nl-wallet/blob/92a40d02e4b9807570d76cf7510a4edb88893fbe/wallet_core/Cargo.lock#L4940",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.2+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/MinBZK/nl-wallet/blob/92a40d02e4b9807570d76cf7510a4edb88893fbe/wallet_core/Cargo.lock#L12054",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": "The SBOM names no workspace package, so the whole workspace was the reference; omitted, version-drift and vendored-c counts may include crates only other members use; omitted and version-drift are left out of the headline."
+  },
+  {
+   "repo": "NodeDB-Lab/nodedb",
+   "stars": 248,
+   "release": "v0.6.2",
+   "commit": "467f0613ae9fed13d4723fb1eaadd306446e1f47",
+   "sbom_asset": "https://github.com/NodeDB-Lab/nodedb/releases/download/v0.6.2/nodedb-0.6.2-sbom.cdx.json",
+   "sbom_file": "nodedb-0.6.2-sbom.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 692,
+   "checked_against": [
+    "cargo tree -e normal,build -p nodedb --target all (678 crates)",
+    "Cargo.lock at the release tag (743 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 20,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 5,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 15,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 0,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 15,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "addr2line 0.26.1",
+    "bit-vec 0.9.1",
+    "borsh 1.8.1",
+    "borsh-derive 1.8.1",
+    "cpp_demangle 0.5.1",
+    "embedded-io 0.4.0",
+    "embedded-io 0.6.1",
+    "glam 0.30.10",
+    "glam 0.31.1",
+    "glam 0.32.1",
+    "glam 0.33.12",
+    "rustc-demangle 0.1.28",
+    "valuable 0.1.1",
+    "wasmtime-internal-fiber 49.0.3",
+    "wasmtime-internal-jit-debug 49.0.3"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.46.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/NodeDB-Lab/nodedb/blob/467f0613ae9fed13d4723fb1eaadd306446e1f47/Cargo.lock#L570",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zlib",
+     "version": null,
+     "detail": "crate libz-sys 1.1.30 compiles it from source; no SBOM component names zlib",
+     "evidence": "https://github.com/NodeDB-Lab/nodedb/blob/467f0613ae9fed13d4723fb1eaadd306446e1f47/Cargo.lock#L3406",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "librdkafka",
+     "version": "2.12.1",
+     "detail": "crate rdkafka-sys 4.10.0+2.12.1 compiles it from source; no SBOM component names librdkafka",
+     "evidence": "https://github.com/NodeDB-Lab/nodedb/blob/467f0613ae9fed13d4723fb1eaadd306446e1f47/Cargo.lock#L5668",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "jemalloc",
+     "version": "5.3.1",
+     "detail": "crate tikv-jemalloc-sys 0.7.1+5.3.1-0-g81034ce1f1373e37dc865038e1bc8eeecf559ce8 compiles it from source; no SBOM component names jemalloc",
+     "evidence": "https://github.com/NodeDB-Lab/nodedb/blob/467f0613ae9fed13d4723fb1eaadd306446e1f47/Cargo.lock#L6835",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.1+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/NodeDB-Lab/nodedb/blob/467f0613ae9fed13d4723fb1eaadd306446e1f47/Cargo.lock#L8236",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package nodedb",
+   "scope_note": null
+  },
+  {
+   "repo": "SylphxAI/anymd",
+   "stars": 1071,
+   "release": "v8.5.13",
+   "commit": "f842da6638780a280204c92095f1c0a6086f211a",
+   "sbom_asset": "https://github.com/SylphxAI/anymd/releases/download/v8.5.13/anymd-8.5.13.cdx.json",
+   "sbom_file": "anymd-8.5.13.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.10",
+   "sbom_components": 367,
+   "checked_against": [
+    "cargo tree -e normal,build -p anymd --target x86_64-unknown-linux-gnu (342 crates)",
+    "Cargo.lock at the release tag (565 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 26,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 0,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 26,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 0,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 19,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "base64ct 1.8.3",
+    "const-oid 0.9.6",
+    "cookie 0.18.2",
+    "cookie_store 0.22.1",
+    "der 0.7.10",
+    "deranged 0.5.9",
+    "document-features 0.2.12",
+    "glifo 0.4.0",
+    "litrs 1.0.1",
+    "num-conv 0.2.2",
+    "pkcs8 0.10.2",
+    "powerfmt 0.2.1",
+    "rand_core 0.6.4",
+    "read-fonts 0.41.0",
+    "skrifa 0.44.0"
+   ],
+   "not_run": [],
+   "headline": [],
+   "tool_error": null,
+   "scope": "package anymd",
+   "scope_note": null
+  },
+  {
+   "repo": "TheMaxMur/RS-Key",
+   "stars": 708,
+   "release": "v0.4.11",
+   "commit": "b26b1b4c1d641d58094efda097090fcde35565e2",
+   "sbom_asset": "https://github.com/TheMaxMur/RS-Key/releases/download/v0.4.11/rs-key-v0.4.11-sbom.cdx.json",
+   "sbom_file": "rs-key-v0.4.11-sbom.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 258,
+   "checked_against": [
+    "cargo tree -e normal,build -p firmware --target thumbv8m.main-none-eabihf (264 crates)",
+    "Cargo.lock at the release tag (320 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 7,
+   "counts": {
+    "omitted": 4,
+    "omitted-build": 1,
+    "vendored-c": 0,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 0,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 2,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 0,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "yanked",
+     "component": "crypto-bigint",
+     "version": "0.7.5",
+     "detail": "crypto-bigint 0.7.5 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/TheMaxMur/RS-Key/blob/b26b1b4c1d641d58094efda097090fcde35565e2/Cargo.lock#L432",
+     "registry": "https://index.crates.io/cr/yp/crypto-bigint",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "wnaf",
+     "version": "0.14.0",
+     "detail": "wnaf 0.14.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/TheMaxMur/RS-Key/blob/b26b1b4c1d641d58094efda097090fcde35565e2/Cargo.lock#L3039",
+     "registry": "https://index.crates.io/wn/af/wnaf",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "omitted",
+     "component": "once_cell",
+     "version": "1.21.4",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/TheMaxMur/RS-Key/blob/b26b1b4c1d641d58094efda097090fcde35565e2/Cargo.lock#L1676",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "winapi-util",
+     "version": "0.1.11",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/TheMaxMur/RS-Key/blob/b26b1b4c1d641d58094efda097090fcde35565e2/Cargo.lock#L3006",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "windows-link",
+     "version": "0.2.1",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/TheMaxMur/RS-Key/blob/b26b1b4c1d641d58094efda097090fcde35565e2/Cargo.lock#L3015",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "windows-sys",
+     "version": "0.61.2",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/TheMaxMur/RS-Key/blob/b26b1b4c1d641d58094efda097090fcde35565e2/Cargo.lock#L3030",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package firmware",
+   "scope_note": null
+  },
+  {
+   "repo": "Wangnov/Codex-App-Manager",
+   "stars": 706,
+   "release": "v0.5.17",
+   "commit": "474658de8b3013d6f2ee68ce0cc0402219de11cc",
+   "sbom_asset": "https://github.com/Wangnov/Codex-App-Manager/releases/download/v0.5.17/sbom-cargo.cdx.json",
+   "sbom_file": "sbom-cargo.cdx.json",
+   "sbom_generator": "cargo-metadata-to-cyclonedx",
+   "sbom_components": 543,
+   "checked_against": [
+    "cargo tree -e normal,build -p codex-app-manager --target x86_64-unknown-linux-gnu (399 crates)",
+    "Cargo.lock at the release tag (543 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 540,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 0,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 144,
+    "unpinned": 0,
+    "unhashed": 394,
+    "yanked": 1,
+    "no-license": 1
+   },
+   "phantom_feature_and_platform_robust": 11,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "bs58 0.5.1",
+    "chrono 0.4.45",
+    "iana-time-zone 0.1.65",
+    "iana-time-zone-haiku 0.1.2",
+    "objc2-io-surface 0.3.2",
+    "ref-cast 1.0.26",
+    "ref-cast-impl 1.0.26",
+    "schemars 0.9.0",
+    "schemars 1.2.1",
+    "tinyvec 1.12.0",
+    "tinyvec_macros 0.1.1"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "yanked",
+     "component": "async-executor",
+     "version": "1.14.0",
+     "detail": "async-executor 1.14.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/Wangnov/Codex-App-Manager/blob/474658de8b3013d6f2ee68ce0cc0402219de11cc/Cargo.lock#L92",
+     "registry": "https://index.crates.io/as/yn/async-executor",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package codex-app-manager",
+   "scope_note": null
+  },
+  {
+   "repo": "agentic-os-org/ANOLISA",
+   "stars": 682,
+   "release": "tokenless/v0.9.6",
+   "commit": "e64816096c51423e4e1404fdb97efddfd3e25c8e",
+   "sbom_asset": "https://github.com/agentic-os-org/ANOLISA/releases/download/tokenless/v0.9.6/tokenless-0.9.6-linux-x86_64.tar.gz.cdx.json",
+   "sbom_file": "tokenless-0.9.6-linux-x86_64.tar.gz.cdx.json",
+   "sbom_generator": "cargo-sbom 0.10.0",
+   "sbom_components": 213,
+   "checked_against": [
+    "cargo tree -e normal,build --workspace --target x86_64-unknown-linux-gnu (172 crates)",
+    "Cargo.lock at the release tag (240 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 267,
+   "counts": {
+    "omitted": 41,
+    "omitted-build": 10,
+    "vendored-c": 1,
+    "version-drift": 34,
+    "hash-drift": 0,
+    "phantom": 98,
+    "unpinned": 0,
+    "unhashed": 82,
+    "yanked": 0,
+    "no-license": 1
+   },
+   "phantom_feature_and_platform_robust": 92,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "actix-codec 0.5.4",
+    "actix-http 3.18.13",
+    "actix-macros 0.2.5",
+    "actix-router 0.5.4",
+    "actix-rt 2.15.0",
+    "actix-server 2.9.8",
+    "actix-service 2.0.3",
+    "actix-utils 3.0.2",
+    "actix-web 4.16.0",
+    "actix-web-codegen 4.4.0",
+    "aho-corasick 1.1.4",
+    "arrayref 0.3.9",
+    "arrayvec 0.7.7",
+    "automod 1.0.16",
+    "blake3 1.8.5"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.0+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/agentic-os-org/ANOLISA/blob/e64816096c51423e4e1404fdb97efddfd3e25c8e/distribution/anolisa/Cargo.lock#L2245",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": "The SBOM names no workspace package, so the whole workspace was the reference; omitted, version-drift and vendored-c counts may include crates only other members use; omitted and version-drift are left out of the headline."
+  },
+  {
+   "repo": "alplabai/signex",
+   "stars": 239,
+   "release": "v26.11.0",
+   "commit": "ccf8df17a1770c023262b7bc86274e0a8db9429b",
+   "sbom_asset": "https://github.com/alplabai/signex/releases/download/v26.11.0/signex-26.11.0.cdx.json",
+   "sbom_file": "signex-26.11.0.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 797,
+   "checked_against": [
+    "cargo tree -e normal,build --workspace --target all (818 crates)",
+    "Cargo.lock at the release tag (865 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 85,
+   "counts": {
+    "omitted": 45,
+    "omitted-build": 1,
+    "vendored-c": 3,
+    "version-drift": 2,
+    "hash-drift": 0,
+    "phantom": 31,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 3,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 31,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "borsh 1.8.1",
+    "const-oid 0.9.6",
+    "dbus 0.9.12",
+    "dbus-secret-service 4.1.0",
+    "dtor 0.7.0",
+    "h2 0.4.20",
+    "id-arena 2.3.0",
+    "leb128fmt 0.1.0",
+    "libdbus-sys 0.2.7",
+    "lru-slab 0.1.2",
+    "objc2-io-surface 0.3.2",
+    "prettyplease 0.2.37",
+    "quinn 0.11.9",
+    "quinn-proto 0.11.14",
+    "quinn-udp 0.5.14"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "libgit2",
+     "version": "1.9.7",
+     "detail": "crate libgit2-sys 0.18.8+1.9.7 compiles it from source; no SBOM component names libgit2",
+     "evidence": "https://github.com/alplabai/signex/blob/ccf8df17a1770c023262b7bc86274e0a8db9429b/Cargo.lock#L3394",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "sqlite",
+     "version": null,
+     "detail": "crate libsqlite3-sys 0.30.1 compiles it from source; no SBOM component names sqlite",
+     "evidence": "https://github.com/alplabai/signex/blob/ccf8df17a1770c023262b7bc86274e0a8db9429b/Cargo.lock#L3434",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.2+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/alplabai/signex/blob/ccf8df17a1770c023262b7bc86274e0a8db9429b/Cargo.lock#L9144",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "async-executor",
+     "version": "1.14.0",
+     "detail": "async-executor 1.14.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/alplabai/signex/blob/ccf8df17a1770c023262b7bc86274e0a8db9429b/Cargo.lock#L278",
+     "registry": "https://index.crates.io/as/yn/async-executor",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "clipboard-win",
+     "version": "5.4.1",
+     "detail": "clipboard-win 5.4.1 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/alplabai/signex/blob/ccf8df17a1770c023262b7bc86274e0a8db9429b/Cargo.lock#L857",
+     "registry": "https://index.crates.io/cl/ip/clipboard-win",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "core2",
+     "version": "0.4.0",
+     "detail": "core2 0.4.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/alplabai/signex/blob/ccf8df17a1770c023262b7bc86274e0a8db9429b/Cargo.lock#L958",
+     "registry": "https://index.crates.io/co/re/core2",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": "The SBOM names no workspace package, so the whole workspace was the reference; omitted, version-drift and vendored-c counts may include crates only other members use; omitted and version-drift are left out of the headline."
+  },
+  {
+   "repo": "artifact-keeper/artifact-keeper",
+   "stars": 1310,
+   "release": "v1.12.2",
+   "commit": "15e91b94cc184da599fb026d2ebfd55a5e1812c7",
+   "sbom_asset": "https://github.com/artifact-keeper/artifact-keeper/releases/download/v1.12.2/artifact-keeper-linux-amd64.cdx.json",
+   "sbom_file": "artifact-keeper-linux-amd64.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.10",
+   "sbom_components": 782,
+   "checked_against": [
+    "cargo tree -e normal,build -p artifact-keeper-backend --target x86_64-unknown-linux-gnu (742 crates)",
+    "Cargo.lock at the release tag (944 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 55,
+   "counts": {
+    "omitted": 4,
+    "omitted-build": 0,
+    "vendored-c": 3,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 45,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 3,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 38,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "aws-lc-fips-sys 0.14.2",
+    "base16ct 1.0.0",
+    "bitflags 1.3.2",
+    "bs58 0.5.1",
+    "const_format 0.2.36",
+    "const_format_proc_macros 0.2.34",
+    "defmt 1.1.1",
+    "defmt-macros 1.1.1",
+    "defmt-parser 1.0.0",
+    "embedded-io 0.4.0",
+    "embedded-io 0.6.1",
+    "fallible-iterator 0.3.0",
+    "flume 0.12.0",
+    "getset 0.1.7",
+    "hashbrown 0.12.3"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.45.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/artifact-keeper/artifact-keeper/blob/15e91b94cc184da599fb026d2ebfd55a5e1812c7/Cargo.lock#L583",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "libgit2",
+     "version": "1.9.6",
+     "detail": "crate libgit2-sys 0.18.7+1.9.6 links it: its bundled source, or the system library when the build host has one; no SBOM component names libgit2",
+     "evidence": "https://github.com/artifact-keeper/artifact-keeper/blob/15e91b94cc184da599fb026d2ebfd55a5e1812c7/Cargo.lock#L4256",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.2+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/artifact-keeper/artifact-keeper/blob/15e91b94cc184da599fb026d2ebfd55a5e1812c7/Cargo.lock#L10540",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "chacha20",
+     "version": "0.10.0",
+     "detail": "chacha20 0.10.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/artifact-keeper/artifact-keeper/blob/15e91b94cc184da599fb026d2ebfd55a5e1812c7/Cargo.lock#L1434",
+     "registry": "https://index.crates.io/ch/ac/chacha20",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "crypto-bigint",
+     "version": "0.7.6",
+     "detail": "crypto-bigint 0.7.6 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/artifact-keeper/artifact-keeper/blob/15e91b94cc184da599fb026d2ebfd55a5e1812c7/Cargo.lock#L1997",
+     "registry": "https://index.crates.io/cr/yp/crypto-bigint",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "der",
+     "version": "0.8.0",
+     "detail": "der 0.8.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/artifact-keeper/artifact-keeper/blob/15e91b94cc184da599fb026d2ebfd55a5e1812c7/Cargo.lock#L2276",
+     "registry": "https://index.crates.io/3/d/der",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "omitted",
+     "component": "etcetera",
+     "version": "0.11.0",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/artifact-keeper/artifact-keeper/blob/15e91b94cc184da599fb026d2ebfd55a5e1812c7/Cargo.lock#L2713",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "winapi-util",
+     "version": "0.1.11",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/artifact-keeper/artifact-keeper/blob/15e91b94cc184da599fb026d2ebfd55a5e1812c7/Cargo.lock#L9702",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "windows-link",
+     "version": "0.2.1",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/artifact-keeper/artifact-keeper/blob/15e91b94cc184da599fb026d2ebfd55a5e1812c7/Cargo.lock#L9772",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "windows-sys",
+     "version": "0.61.2",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/artifact-keeper/artifact-keeper/blob/15e91b94cc184da599fb026d2ebfd55a5e1812c7/Cargo.lock#L9845",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package artifact-keeper-backend",
+   "scope_note": null
+  },
+  {
+   "repo": "contentauth/c2patool",
+   "stars": 174,
+   "release": "v0.29.0",
+   "commit": "487e5428429f7637af95b93829bd483e9a8e3e59",
+   "sbom_asset": "https://github.com/contentauth/c2patool/releases/download/v0.29.0/v0.29.0-x86_64-unknown-linux-gnu-sbom.json",
+   "sbom_file": "v0.29.0-x86_64-unknown-linux-gnu-sbom.json",
+   "sbom_generator": "cargo-sbom-v0.9.1",
+   "sbom_components": 460,
+   "checked_against": [
+    "cargo tree -e normal,build -p c2patool --target x86_64-unknown-linux-gnu (356 crates)",
+    "Cargo.lock at the release tag (503 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 471,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 11,
+    "vendored-c": 1,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 115,
+    "unpinned": 0,
+    "unhashed": 344,
+    "yanked": 0,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 26,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "bs58 0.5.1",
+    "dyn-clone 1.0.20",
+    "futures-macro 0.3.34",
+    "hashbrown 0.12.3",
+    "httpdate 1.0.3",
+    "indexmap 1.9.3",
+    "jiff-tzdb 0.1.9",
+    "jiff-tzdb-platform 0.1.3",
+    "lru-slab 0.1.3",
+    "proptest 1.12.0",
+    "quinn 0.11.12",
+    "quinn-proto 0.11.19",
+    "quinn-udp 0.5.16",
+    "rand_pcg 0.10.2",
+    "rand_xorshift 0.5.0"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "openssl",
+     "version": "3.6.3",
+     "detail": "crate openssl-src 300.6.1+3.6.3 compiles it from source; no SBOM component names openssl",
+     "evidence": "https://github.com/contentauth/c2patool/blob/487e5428429f7637af95b93829bd483e9a8e3e59/Cargo.lock#L2587",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package c2patool",
+   "scope_note": null
+  },
+  {
+   "repo": "dirge-code/dirge",
+   "stars": 391,
+   "release": "v0.26.1",
+   "commit": "7eb18de27eaf5775a00220e74ee5b2c40375c706",
+   "sbom_asset": "https://github.com/dirge-code/dirge/releases/download/v0.26.1/sbom.spdx.json",
+   "sbom_file": "sbom.spdx.json",
+   "sbom_generator": "cargo-sbom-v0.10.0",
+   "sbom_components": 620,
+   "checked_against": [
+    "cargo tree -e normal,build --workspace --target x86_64-unknown-linux-gnu (437 crates)",
+    "Cargo.lock at the release tag (645 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 647,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 19,
+    "vendored-c": 1,
+    "version-drift": 2,
+    "hash-drift": 0,
+    "phantom": 204,
+    "unpinned": 0,
+    "unhashed": 414,
+    "yanked": 2,
+    "no-license": 5
+   },
+   "phantom_feature_and_platform_robust": 19,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "approx 0.5.1",
+    "bs58 0.5.1",
+    "by_address 1.2.1",
+    "des 0.9.0",
+    "dispatch2 0.3.1",
+    "fast-srgb8 1.0.0",
+    "hashbrown 0.12.3",
+    "indexmap 1.9.3",
+    "libm 0.2.16",
+    "num_threads 0.1.7",
+    "palette 0.7.6",
+    "palette_derive 0.7.6",
+    "password-hash 0.6.1",
+    "phc 0.6.1",
+    "portable-atomic 1.14.0"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "sqlite",
+     "version": null,
+     "detail": "crate libsqlite3-sys 0.38.1 compiles it from source; no SBOM component names sqlite",
+     "evidence": "https://github.com/dirge-code/dirge/blob/7eb18de27eaf5775a00220e74ee5b2c40375c706/Cargo.lock#L2857",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "async-executor",
+     "version": "1.14.0",
+     "detail": "async-executor 1.14.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/dirge-code/dirge/blob/7eb18de27eaf5775a00220e74ee5b2c40375c706/Cargo.lock#L263",
+     "registry": "https://index.crates.io/as/yn/async-executor",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "crypto-bigint",
+     "version": "0.7.6",
+     "detail": "crypto-bigint 0.7.6 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/dirge-code/dirge/blob/7eb18de27eaf5775a00220e74ee5b2c40375c706/Cargo.lock#L988",
+     "registry": "https://index.crates.io/cr/yp/crypto-bigint",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": "The SBOM names no workspace package, so the whole workspace was the reference; omitted, version-drift and vendored-c counts may include crates only other members use; omitted and version-drift are left out of the headline."
+  },
+  {
+   "repo": "eliasbiondo/antirion",
+   "stars": 435,
+   "release": "v0.1.1",
+   "commit": "321a35a95b8d7f901164eefb0b63ff7e9a03bde0",
+   "sbom_asset": "https://github.com/eliasbiondo/antirion/releases/download/v0.1.1/antirion-v0.1.1-linux-amd64.cdx.json",
+   "sbom_file": "antirion-v0.1.1-linux-amd64.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 420,
+   "checked_against": [
+    "cargo tree -e normal,build -p antirion --target x86_64-unknown-linux-gnu (408 crates)",
+    "Cargo.lock at the release tag (493 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 17,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 4,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 13,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 0,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 13,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "addr2line 0.26.1",
+    "bitflags 1.3.2",
+    "cpp_demangle 0.5.1",
+    "defmt 1.1.1",
+    "defmt-macros 1.1.1",
+    "defmt-parser 1.0.0",
+    "embedded-io 0.4.0",
+    "embedded-io 0.6.1",
+    "getrandom 0.2.17",
+    "ring 0.17.14",
+    "rustc-demangle 0.1.28",
+    "wasmtime-internal-jit-debug 48.0.6",
+    "zlib-rs 0.6.8"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.45.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/eliasbiondo/antirion/blob/321a35a95b8d7f901164eefb0b63ff7e9a03bde0/Cargo.lock#L771",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "sqlite",
+     "version": null,
+     "detail": "crate libsqlite3-sys 0.38.2 compiles it from source; no SBOM component names sqlite",
+     "evidence": "https://github.com/eliasbiondo/antirion/blob/321a35a95b8d7f901164eefb0b63ff7e9a03bde0/Cargo.lock#L2715",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "jemalloc",
+     "version": "5.3.1",
+     "detail": "crate tikv-jemalloc-sys 0.7.1+5.3.1-0-g81034ce1f1373e37dc865038e1bc8eeecf559ce8 compiles it from source; no SBOM component names jemalloc",
+     "evidence": "https://github.com/eliasbiondo/antirion/blob/321a35a95b8d7f901164eefb0b63ff7e9a03bde0/Cargo.lock#L4049",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.0+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/eliasbiondo/antirion/blob/321a35a95b8d7f901164eefb0b63ff7e9a03bde0/Cargo.lock#L5219",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package antirion",
+   "scope_note": null
+  },
+  {
+   "repo": "ferronweb/ferron",
+   "stars": 2218,
+   "release": "3.0.0-rc.11",
+   "commit": "63648d8c93d214f70686a0db72cfaec778f57156",
+   "sbom_asset": "https://github.com/ferronweb/ferron/releases/download/3.0.0-rc.11/ferron-3.0.0-rc.11-x86_64-unknown-linux-gnu-sbom.tar.gz",
+   "sbom_file": "ferron_bin.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.10",
+   "sbom_components": 447,
+   "checked_against": [
+    "cargo tree -e normal,build -p ferron --target x86_64-unknown-linux-gnu (434 crates)",
+    "Cargo.lock at the release tag (561 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 80,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 6,
+    "vendored-c": 3,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 20,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 0,
+    "no-license": 51
+   },
+   "phantom_feature_and_platform_robust": 16,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "asn1-rs 0.7.2",
+    "asn1-rs-derive 0.6.0",
+    "asn1-rs-impl 0.2.0",
+    "axum 0.8.9",
+    "axum-core 0.5.6",
+    "bit-vec 0.9.1",
+    "der-parser 10.0.0",
+    "lazy_static 1.5.1",
+    "matchit 0.8.4",
+    "mime 0.3.18",
+    "oid-registry 0.8.1",
+    "rusticata-macros 4.1.0",
+    "synstructure 0.13.2",
+    "time-macros 0.2.32",
+    "toml_writer 1.2.0+spec-1.1.0"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.47.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/ferronweb/ferron/blob/63648d8c93d214f70686a0db72cfaec778f57156/Cargo.lock#L271",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "jemalloc",
+     "version": "5.3.1",
+     "detail": "crate tikv-jemalloc-sys 0.7.1+5.3.1-0-g81034ce1f1373e37dc865038e1bc8eeecf559ce8 compiles it from source; no SBOM component names jemalloc",
+     "evidence": "https://github.com/ferronweb/ferron/blob/63648d8c93d214f70686a0db72cfaec778f57156/Cargo.lock#L4923",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.2+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/ferronweb/ferron/blob/63648d8c93d214f70686a0db72cfaec778f57156/Cargo.lock#L6089",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package ferron",
+   "scope_note": null
+  },
+  {
+   "repo": "fwdai/rowel",
+   "stars": 967,
+   "release": "v1.1.1",
+   "commit": "653a2e778ad92883bdfb7166727bc571e3727250",
+   "sbom_asset": "https://github.com/fwdai/rowel/releases/download/v1.1.1/rowel-rust.cdx.json",
+   "sbom_file": "rowel-rust.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 541,
+   "checked_against": [
+    "cargo tree -e normal,build -p rowel --target x86_64-unknown-linux-gnu (530 crates)",
+    "Cargo.lock at the release tag (763 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 28,
+   "counts": {
+    "omitted": 3,
+    "omitted-build": 3,
+    "vendored-c": 2,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 18,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 1,
+    "no-license": 1
+   },
+   "phantom_feature_and_platform_robust": 18,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "bs58 0.5.1",
+    "defmt 1.2.0",
+    "defmt-macros 1.2.0",
+    "defmt-parser 1.1.0",
+    "jiff 0.2.38",
+    "jiff-core 0.1.1",
+    "libm 0.2.16",
+    "num-bigint-dig 0.8.6",
+    "num-integer 0.1.47",
+    "num-iter 0.1.46",
+    "pkcs1 0.7.5",
+    "ref-cast 1.0.27",
+    "ref-cast-impl 1.0.27",
+    "rsa 0.9.10",
+    "schemars 0.9.0"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "sqlite",
+     "version": null,
+     "detail": "crate libsqlite3-sys 0.30.1 compiles it from source; no SBOM component names sqlite",
+     "evidence": "https://github.com/fwdai/rowel/blob/653a2e778ad92883bdfb7166727bc571e3727250/src-tauri/Cargo.lock#L3200",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "openssl",
+     "version": "3.6.3",
+     "detail": "crate openssl-src 300.6.1+3.6.3 compiles it from source; no SBOM component names openssl",
+     "evidence": "https://github.com/fwdai/rowel/blob/653a2e778ad92883bdfb7166727bc571e3727250/src-tauri/Cargo.lock#L3819",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "async-executor",
+     "version": "1.14.0",
+     "detail": "async-executor 1.14.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/fwdai/rowel/blob/653a2e778ad92883bdfb7166727bc571e3727250/src-tauri/Cargo.lock#L241",
+     "registry": "https://index.crates.io/as/yn/async-executor",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "omitted",
+     "component": "winapi-util",
+     "version": "0.1.11",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/fwdai/rowel/blob/653a2e778ad92883bdfb7166727bc571e3727250/src-tauri/Cargo.lock#L7413",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "windows-link",
+     "version": "0.2.1",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/fwdai/rowel/blob/653a2e778ad92883bdfb7166727bc571e3727250/src-tauri/Cargo.lock#L7563",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "windows-sys",
+     "version": "0.61.2",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/fwdai/rowel/blob/653a2e778ad92883bdfb7166727bc571e3727250/src-tauri/Cargo.lock#L7698",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package rowel",
+   "scope_note": null
+  },
+  {
+   "repo": "google/capsem",
+   "stars": 190,
+   "release": "v0.7.2",
+   "commit": "f2b2a6d9b28d4582aec86b8911af388cf38c88ee",
+   "sbom_asset": "https://github.com/google/capsem/releases/download/v0.7.2/capsem-sbom.spdx.json",
+   "sbom_file": "capsem-sbom.spdx.json",
+   "sbom_generator": "capsem generate-host-binary-sbom",
+   "sbom_components": 0,
+   "checked_against": [
+    "Cargo.lock at the release tag (854 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 822,
+   "counts": {
+    "omitted": 819,
+    "omitted-build": 0,
+    "vendored-c": 2,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 0,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 1,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 0,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.45.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/google/capsem/blob/f2b2a6d9b28d4582aec86b8911af388cf38c88ee/Cargo.lock#L416",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.2+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/google/capsem/blob/f2b2a6d9b28d4582aec86b8911af388cf38c88ee/Cargo.lock#L9529",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "async-executor",
+     "version": "1.14.0",
+     "detail": "async-executor 1.14.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/google/capsem/blob/f2b2a6d9b28d4582aec86b8911af388cf38c88ee/Cargo.lock#L255",
+     "registry": "https://index.crates.io/as/yn/async-executor",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": "The SBOM names no workspace package, so the whole workspace was the reference; omitted, version-drift and vendored-c counts may include crates only other members use; omitted and version-drift are left out of the headline."
+  },
+  {
+   "repo": "hcavarsan/kftray",
+   "stars": 1581,
+   "release": "v0.35.2",
+   "commit": "3171556e17fb7e314be728d24ea10c12753edf61",
+   "sbom_asset": "https://github.com/hcavarsan/kftray/releases/download/v0.35.2/sbom-kftray.cdx.json",
+   "sbom_file": "sbom-kftray.cdx.json",
+   "sbom_generator": "sbomasm v2.1.2",
+   "sbom_components": 914,
+   "checked_against": [
+    "cargo tree -e normal,build --workspace --target x86_64-unknown-linux-gnu (777 crates)",
+    "Cargo.lock at the release tag (1060 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 265,
+   "counts": {
+    "omitted": 48,
+    "omitted-build": 7,
+    "vendored-c": 4,
+    "version-drift": 5,
+    "hash-drift": 0,
+    "phantom": 197,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 1,
+    "no-license": 3
+   },
+   "phantom_feature_and_platform_robust": 39,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "asn1-rs 0.7.2",
+    "asn1-rs-derive 0.6.0",
+    "asn1-rs-impl 0.2.0",
+    "atomic 0.6.1",
+    "bit-vec 0.9.1",
+    "bs58 0.5.1",
+    "defmt 1.2.0",
+    "defmt-macros 1.2.0",
+    "defmt-parser 1.1.0",
+    "der-parser 10.0.0",
+    "des 0.9.0",
+    "dotenvy 0.15.7",
+    "lru-slab 0.1.3",
+    "matchers 0.2.0",
+    "objc2-io-surface 0.3.2"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.47.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/hcavarsan/kftray/blob/3171556e17fb7e314be728d24ea10c12753edf61/Cargo.lock#L537",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "libgit2",
+     "version": "1.9.7",
+     "detail": "crate libgit2-sys 0.18.8+1.9.7 links it: its bundled source, or the system library when the build host has one; no SBOM component names libgit2",
+     "evidence": "https://github.com/hcavarsan/kftray/blob/3171556e17fb7e314be728d24ea10c12753edf61/Cargo.lock#L4968",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "sqlite",
+     "version": null,
+     "detail": "crate libsqlite3-sys 0.37.0 compiles it from source; no SBOM component names sqlite",
+     "evidence": "https://github.com/hcavarsan/kftray/blob/3171556e17fb7e314be728d24ea10c12753edf61/Cargo.lock#L5017",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "openssl",
+     "version": "3.6.3",
+     "detail": "crate openssl-src 300.6.1+3.6.3 compiles it from source; no SBOM component names openssl",
+     "evidence": "https://github.com/hcavarsan/kftray/blob/3171556e17fb7e314be728d24ea10c12753edf61/Cargo.lock#L6087",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "async-executor",
+     "version": "1.14.0",
+     "detail": "async-executor 1.14.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/hcavarsan/kftray/blob/3171556e17fb7e314be728d24ea10c12753edf61/Cargo.lock#L345",
+     "registry": "https://index.crates.io/as/yn/async-executor",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": "The SBOM names no workspace package, so the whole workspace was the reference; omitted, version-drift and vendored-c counts may include crates only other members use; omitted and version-drift are left out of the headline."
+  },
+  {
+   "repo": "hyper-mcp-rs/hyper-mcp",
+   "stars": 885,
+   "release": "nightly",
+   "commit": "fb2b24fbbe662d0c01140987d1b6cb5aacf9bb62",
+   "sbom_asset": "https://github.com/hyper-mcp-rs/hyper-mcp/releases/download/nightly/sbom.cdx.json",
+   "sbom_file": "sbom.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.10",
+   "sbom_components": 633,
+   "checked_against": [
+    "cargo tree -e normal,build -p hyper-mcp --target x86_64-unknown-linux-gnu (592 crates)",
+    "Cargo.lock at the release tag (713 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 52,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 2,
+    "vendored-c": 2,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 44,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 4,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 35,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "assert-json-diff 2.0.2",
+    "aws-lc-fips-sys 0.13.15",
+    "aws-smithy-protocol-test 0.63.14",
+    "bs58 0.5.1",
+    "cbor-diag 0.1.12",
+    "cfg_aliases 0.2.1",
+    "chacha20 0.10.1",
+    "ciborium 0.2.2",
+    "ciborium-io 0.2.2",
+    "ciborium-ll 0.2.2",
+    "data-encoding 2.11.0",
+    "diff 0.1.13",
+    "embedded-io 0.4.0",
+    "embedded-io 0.6.1",
+    "half 2.7.1"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.42.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/hyper-mcp-rs/hyper-mcp/blob/fb2b24fbbe662d0c01140987d1b6cb5aacf9bb62/Cargo.lock#L389",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.0.16+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/hyper-mcp-rs/hyper-mcp/blob/fb2b24fbbe662d0c01140987d1b6cb5aacf9bb62/Cargo.lock#L7821",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "async-executor",
+     "version": "1.14.0",
+     "detail": "async-executor 1.14.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/hyper-mcp-rs/hyper-mcp/blob/fb2b24fbbe662d0c01140987d1b6cb5aacf9bb62/Cargo.lock#L200",
+     "registry": "https://index.crates.io/as/yn/async-executor",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "spin",
+     "version": "0.10.0",
+     "detail": "spin 0.10.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/hyper-mcp-rs/hyper-mcp/blob/fb2b24fbbe662d0c01140987d1b6cb5aacf9bb62/Cargo.lock#L5872",
+     "registry": "https://index.crates.io/sp/in/spin",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "spin",
+     "version": "0.9.8",
+     "detail": "spin 0.9.8 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/hyper-mcp-rs/hyper-mcp/blob/fb2b24fbbe662d0c01140987d1b6cb5aacf9bb62/Cargo.lock#L5866",
+     "registry": "https://index.crates.io/sp/in/spin",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "chacha20",
+     "version": "0.10.1",
+     "detail": "chacha20 0.10.1 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/hyper-mcp-rs/hyper-mcp/blob/fb2b24fbbe662d0c01140987d1b6cb5aacf9bb62/Cargo.lock#L1271",
+     "registry": "https://index.crates.io/ch/ac/chacha20",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package hyper-mcp",
+   "scope_note": null
+  },
+  {
+   "repo": "kellnr/kellnr",
+   "stars": 1112,
+   "release": "v7.3.0",
+   "commit": "531ff6505ee20cb3a7fbf77a416d3aa526404be3",
+   "sbom_asset": "https://github.com/kellnr/kellnr/releases/download/v7.3.0/kellnr-7.3.0.cdx.json",
+   "sbom_file": "kellnr-7.3.0.cdx.json",
+   "sbom_generator": "cdxgen 13.0.1",
+   "sbom_components": 1562,
+   "checked_against": [
+    "cargo tree -e normal,build -p kellnr --target x86_64-unknown-linux-gnu (590 crates)",
+    "Cargo.lock at the release tag (807 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 1605,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 7,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 484,
+    "unpinned": 2,
+    "unhashed": 0,
+    "yanked": 7,
+    "no-license": 1105
+   },
+   "phantom_feature_and_platform_robust": 383,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "ab_glyph 0.2.19",
+    "ab_glyph_rasterizer 0.1.8",
+    "adler 1.0.2",
+    "adler32 1.2.0",
+    "ahash 0.8.12",
+    "ahash 0.7.6",
+    "aho-corasick 0.7.20",
+    "andrew 0.3.1",
+    "android_glue 0.2.3",
+    "ansi_term 0.12.1",
+    "approx 0.4.0",
+    "arrayvec 0.5.2",
+    "arrow 57.3.1",
+    "arrow-arith 57.3.1",
+    "arrow-array 57.3.1"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.46.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/Cargo.lock#L594",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "curl",
+     "version": "8.20.0",
+     "detail": "crate curl-sys 0.4.89+curl-8.20.0 links it: its bundled source, or the system library when the build host has one; no SBOM component names curl",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/Cargo.lock#L1661",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "libgit2",
+     "version": "1.9.2",
+     "detail": "crate libgit2-sys 0.18.3+1.9.2 links it: its bundled source, or the system library when the build host has one; no SBOM component names libgit2",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/Cargo.lock#L4749",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "nghttp2",
+     "version": "1.64.0",
+     "detail": "crate libnghttp2-sys 0.1.11+1.64.0 compiles it from source; no SBOM component names nghttp2",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/Cargo.lock#L4779",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "sqlite",
+     "version": null,
+     "detail": "crate libsqlite3-sys 0.37.0 compiles it from source; no SBOM component names sqlite",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/Cargo.lock#L4800",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "openssl",
+     "version": "3.5.4",
+     "detail": "crate openssl-src 300.5.4+3.5.4 compiles it from source; no SBOM component names openssl",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/Cargo.lock#L5546",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.2+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/Cargo.lock#L9185",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "aes",
+     "version": "0.9.0",
+     "detail": "aes 0.9.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/Cargo.lock#L33",
+     "registry": "https://index.crates.io/3/a/aes",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "chacha20",
+     "version": "0.10.0",
+     "detail": "chacha20 0.10.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/Cargo.lock#L1199",
+     "registry": "https://index.crates.io/ch/ac/chacha20",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "spin",
+     "version": "0.10.0",
+     "detail": "spin 0.10.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/Cargo.lock#L7228",
+     "registry": "https://index.crates.io/sp/in/spin",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "spin",
+     "version": "0.9.8",
+     "detail": "spin 0.9.8 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/Cargo.lock#L7219",
+     "registry": "https://index.crates.io/sp/in/spin",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "ahash",
+     "version": "0.7.6",
+     "detail": "ahash 0.7.6 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/tests/crates/test-s3-storage/full-toml/Cargo.lock#L34",
+     "registry": "https://index.crates.io/ah/as/ahash",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "crossbeam-channel",
+     "version": "0.5.6",
+     "detail": "crossbeam-channel 0.5.6 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/tests/crates/test-s3-storage/full-toml/Cargo.lock#L437",
+     "registry": "https://index.crates.io/cr/os/crossbeam-channel",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "futures-util",
+     "version": "0.3.25",
+     "detail": "futures-util 0.3.25 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/kellnr/kellnr/blob/531ff6505ee20cb3a7fbf77a416d3aa526404be3/tests/crates/test-s3-storage/full-toml/Cargo.lock#L738",
+     "registry": "https://index.crates.io/fu/tu/futures-util",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package kellnr",
+   "scope_note": null
+  },
+  {
+   "repo": "matthart1983/netwatch",
+   "stars": 3604,
+   "release": "v1.0.0",
+   "commit": "78f85143a2d43cd86c9ed4e65b48bbace4a21441",
+   "sbom_asset": "https://github.com/matthart1983/netwatch/releases/download/v1.0.0/netwatch-1.0.0.cdx.json",
+   "sbom_file": "netwatch-1.0.0.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 282,
+   "checked_against": [
+    "cargo tree -e normal,build -p netwatch-tui --target x86_64-unknown-linux-gnu (222 crates)",
+    "Cargo.lock at the release tag (363 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 63,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 1,
+    "vendored-c": 0,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 62,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 0,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 62,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "approx 0.5.1",
+    "atomic 0.6.1",
+    "base64 0.22.1",
+    "bit-set 0.5.3",
+    "bit-vec 0.6.3",
+    "block-buffer 0.10.4",
+    "by_address 1.2.1",
+    "bytemuck 1.25.2",
+    "cookie 0.18.2",
+    "cookie_store 0.22.1",
+    "cpufeatures 0.2.17",
+    "crypto-common 0.1.7",
+    "csscolorparser 0.6.2",
+    "deltae 0.3.2",
+    "digest 0.10.7"
+   ],
+   "not_run": [],
+   "headline": [],
+   "tool_error": null,
+   "scope": "package netwatch-tui",
+   "scope_note": null
+  },
+  {
+   "repo": "moltis-org/moltis",
+   "stars": 2976,
+   "release": "20261023.01",
+   "commit": "177f8f13f4e69cf2042eee1b2c5b115671861840",
+   "sbom_asset": "https://github.com/moltis-org/moltis/releases/download/20261023.01/moltis-sbom.cdx.json",
+   "sbom_file": "moltis-sbom.cdx.json",
+   "sbom_generator": "cargo-sbom 0.10.0",
+   "sbom_components": 1309,
+   "checked_against": [
+    "cargo tree -e normal,build -p moltis --target x86_64-unknown-linux-gnu (1109 crates)",
+    "Cargo.lock at the release tag (1384 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 1275,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 33,
+    "vendored-c": 7,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 234,
+    "unpinned": 1,
+    "unhashed": 992,
+    "yanked": 7,
+    "no-license": 1
+   },
+   "phantom_feature_and_platform_robust": 102,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "a2 0.10.0",
+    "accessory 2.1.0",
+    "auditable-serde 0.8.0",
+    "bip39 2.2.2",
+    "delegate-display 3.0.0",
+    "derivative 2.2.0",
+    "embedded-io 0.6.1",
+    "embedded-io 0.4.0",
+    "endian-type 0.1.2",
+    "erased-serde 0.3.31",
+    "etcetera 0.8.0",
+    "fancy_constructor 2.1.0",
+    "futf 0.1.5",
+    "gix-merge 0.16.0",
+    "gloo-utils 0.2.0"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.46.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L846",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "curl",
+     "version": "8.19.0",
+     "detail": "crate curl-sys 0.4.87+curl-8.19.0 compiles it from source; no SBOM component names curl",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L2399",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "nghttp2",
+     "version": "1.68.1",
+     "detail": "crate libnghttp2-sys 0.1.13+1.68.1 compiles it from source; no SBOM component names nghttp2",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L6372",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "sqlite",
+     "version": null,
+     "detail": "crate libsqlite3-sys 0.35.0 compiles it from source; no SBOM component names sqlite",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L6394",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "openssl",
+     "version": "3.6.2",
+     "detail": "crate openssl-src 300.6.0+3.6.2 compiles it from source; no SBOM component names openssl",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L9748",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "jemalloc",
+     "version": "5.3.0",
+     "detail": "crate tikv-jemalloc-sys 0.6.1+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7 compiles it from source; no SBOM component names jemalloc",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L13245",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.0.16+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L16608",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "async-utility",
+     "version": "0.3.1",
+     "detail": "async-utility 0.3.1 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L722",
+     "registry": "https://index.crates.io/as/yn/async-utility",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "chacha20",
+     "version": "0.10.0",
+     "detail": "chacha20 0.10.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L1558",
+     "registry": "https://index.crates.io/ch/ac/chacha20",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "der",
+     "version": "0.8.0",
+     "detail": "der 0.8.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L2651",
+     "registry": "https://index.crates.io/3/d/der",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "negentropy",
+     "version": "0.5.0",
+     "detail": "negentropy 0.5.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L9167",
+     "registry": "https://index.crates.io/ne/ge/negentropy",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "nostr",
+     "version": "0.44.2",
+     "detail": "nostr 0.44.2 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L9297",
+     "registry": "https://index.crates.io/no/st/nostr",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "nostr-relay-pool",
+     "version": "0.44.0",
+     "detail": "nostr-relay-pool 0.44.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L9359",
+     "registry": "https://index.crates.io/no/st/nostr-relay-pool",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "spin",
+     "version": "0.9.8",
+     "detail": "spin 0.9.8 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/moltis-org/moltis/blob/177f8f13f4e69cf2042eee1b2c5b115671861840/Cargo.lock#L12524",
+     "registry": "https://index.crates.io/sp/in/spin",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package moltis",
+   "scope_note": null
+  },
+  {
+   "repo": "open-wallet-standard/core",
+   "stars": 382,
+   "release": "v1.4.5",
+   "commit": "947f5627cb71299951cd3163b178f1c2b1e9c850",
+   "sbom_asset": "https://github.com/open-wallet-standard/core/releases/download/v1.4.5/sbom.tar.gz",
+   "sbom_file": "ows-full.spdx.json",
+   "sbom_generator": "syft-1.24.0",
+   "sbom_components": 1973,
+   "checked_against": [
+    "cargo tree -e normal,build --workspace --target x86_64-unknown-linux-gnu (485 crates)",
+    "Cargo.lock at the release tag (669 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 1407,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 0,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 208,
+    "unpinned": 6,
+    "unhashed": 479,
+    "yanked": 1,
+    "no-license": 713
+   },
+   "phantom_feature_and_platform_robust": 131,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "aho-corasick 1.1.4",
+    "arrayvec 0.4.12",
+    "assert-json-diff 2.0.2",
+    "async-channel 2.5.0",
+    "async-executor 1.14.0",
+    "async-fs 2.2.0",
+    "async-io 2.6.0",
+    "async-lock 3.4.2",
+    "async-net 2.0.0",
+    "async-process 2.5.0",
+    "async-signal 0.2.14",
+    "async-task 4.7.1",
+    "atomic-take 1.1.0",
+    "bip39 2.2.2",
+    "blake2-rfc 0.2.18"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "yanked",
+     "component": "async-executor",
+     "version": "1.14.0",
+     "detail": "async-executor 1.14.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/open-wallet-standard/core/blob/947f5627cb71299951cd3163b178f1c2b1e9c850/bindings/node/Cargo.lock#L131",
+     "registry": "https://index.crates.io/as/yn/async-executor",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": null
+  },
+  {
+   "repo": "ovexro/dockpanel",
+   "stars": 996,
+   "release": "v2.242.1",
+   "commit": "514d9ea466033b457252d67595057c778fb0e642",
+   "sbom_asset": "https://github.com/ovexro/dockpanel/releases/download/v2.242.1/dockpanel-agent.spdx.json",
+   "sbom_file": "dockpanel-agent.spdx.json",
+   "sbom_generator": "cargo-sbom-v0.10.0",
+   "sbom_components": 340,
+   "checked_against": [
+    "cargo tree -e normal,build --workspace --target x86_64-unknown-linux-gnu (257 crates)",
+    "Cargo.lock at the release tag (357 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 355,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 13,
+    "vendored-c": 2,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 96,
+    "unpinned": 0,
+    "unhashed": 243,
+    "yanked": 1,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 34,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "bit-vec 0.9.1",
+    "bitflags 1.3.2",
+    "bs58 0.5.1",
+    "chacha20 0.10.1",
+    "defmt 1.1.1",
+    "defmt-macros 1.1.1",
+    "defmt-parser 1.0.0",
+    "dyn-clone 1.0.20",
+    "hashbrown 0.12.3",
+    "indexmap 1.9.3",
+    "jiff 0.2.35",
+    "jiff-core 0.1.0",
+    "jiff-static 0.2.35",
+    "jiff-tzdb 0.1.8",
+    "jiff-tzdb-platform 0.1.3"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.44.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/ovexro/dockpanel/blob/514d9ea466033b457252d67595057c778fb0e642/panel/agent/Cargo.lock#L134",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "jemalloc",
+     "version": "5.3.0",
+     "detail": "crate tikv-jemalloc-sys 0.6.1+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7 compiles it from source; no SBOM component names jemalloc",
+     "evidence": "https://github.com/ovexro/dockpanel/blob/514d9ea466033b457252d67595057c778fb0e642/panel/agent/Cargo.lock#L2742",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "chacha20",
+     "version": "0.10.1",
+     "detail": "chacha20 0.10.1 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/ovexro/dockpanel/blob/514d9ea466033b457252d67595057c778fb0e642/panel/agent/Cargo.lock#L374",
+     "registry": "https://index.crates.io/ch/ac/chacha20",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": "The SBOM names no workspace package, so the whole workspace was the reference; omitted, version-drift and vendored-c counts may include crates only other members use; omitted and version-drift are left out of the headline."
+  },
+  {
+   "repo": "samyama-ai/samyama-graph",
+   "stars": 188,
+   "release": "v1.16.0",
+   "commit": "26da2c4919764913f307552e6df606677c87d23b",
+   "sbom_asset": "https://github.com/samyama-ai/samyama-graph/releases/download/v1.16.0/sbom-source.spdx.json",
+   "sbom_file": "sbom-source.spdx.json",
+   "sbom_generator": "syft-1.42.3",
+   "sbom_components": 1099,
+   "checked_against": [
+    "cargo tree -e normal,build --workspace --target x86_64-unknown-linux-gnu (407 crates)",
+    "Cargo.lock at the release tag (574 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 1328,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 4,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 243,
+    "unpinned": 3,
+    "unhashed": 400,
+    "yanked": 2,
+    "no-license": 676
+   },
+   "phantom_feature_and_platform_robust": 140,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "anes 0.1.6",
+    "asn1-rs 0.7.2",
+    "asn1-rs-derive 0.6.0",
+    "asn1-rs-impl 0.2.0",
+    "aws-lc-rs 1.18.2",
+    "aws-lc-sys 0.46.0",
+    "bit-vec 0.9.1",
+    "borsh 1.8.1",
+    "borsh-derive 1.8.1",
+    "bzip2-sys 0.1.13+1.0.8",
+    "cast 0.3.0",
+    "cc 1.9.0",
+    "ciborium 0.2.2",
+    "ciborium-io 0.2.2",
+    "ciborium-ll 0.2.2"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.45.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/samyama-ai/samyama-graph/blob/26da2c4919764913f307552e6df606677c87d23b/Cargo.lock#L443",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "rocksdb",
+     "version": "8.10.0",
+     "detail": "crate librocksdb-sys 0.16.0+8.10.0 compiles it from source; no SBOM component names rocksdb",
+     "evidence": "https://github.com/samyama-ai/samyama-graph/blob/26da2c4919764913f307552e6df606677c87d23b/Cargo.lock#L2437",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "lz4",
+     "version": "1.10.0",
+     "detail": "crate lz4-sys 1.11.1+lz4-1.10.0 compiles it from source; no SBOM component names lz4",
+     "evidence": "https://github.com/samyama-ai/samyama-graph/blob/26da2c4919764913f307552e6df606677c87d23b/Cargo.lock#L2518",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.2+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/samyama-ai/samyama-graph/blob/26da2c4919764913f307552e6df606677c87d23b/Cargo.lock#L5799",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "yoke-derive",
+     "version": "0.8.3",
+     "detail": "yoke-derive 0.8.3 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/samyama-ai/samyama-graph/blob/26da2c4919764913f307552e6df606677c87d23b/Cargo.lock#L5677",
+     "registry": "https://index.crates.io/yo/ke/yoke-derive",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "yanked",
+     "component": "clipboard-win",
+     "version": "5.4.1",
+     "detail": "clipboard-win 5.4.1 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/samyama-ai/samyama-graph/blob/26da2c4919764913f307552e6df606677c87d23b/Cargo.lock#L916",
+     "registry": "https://index.crates.io/cl/ip/clipboard-win",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": null
+  },
+  {
+   "repo": "sonos/tract",
+   "stars": 3130,
+   "release": "v0.23.10",
+   "commit": "38409dcb23a936f93c354073ce1fc22a1ddf823a",
+   "sbom_asset": "https://github.com/sonos/tract/releases/download/v0.23.10/tract-x86_64-unknown-linux-musl-0.23.10.cdx.json",
+   "sbom_file": "tract-x86_64-unknown-linux-musl-0.23.10.cdx.json",
+   "sbom_generator": "syft 1.54.0",
+   "sbom_components": 1585,
+   "checked_against": [
+    "cargo tree -e normal,build --workspace --target x86_64-unknown-linux-gnu (488 crates)",
+    "Cargo.lock at the release tag (631 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 1346,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 0,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 174,
+    "unpinned": 29,
+    "unhashed": 420,
+    "yanked": 0,
+    "no-license": 723
+   },
+   "phantom_feature_and_platform_robust": 64,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "approx 0.5.1",
+    "ascii 1.1.0",
+    "bindgen 0.65.1",
+    "bitflags 1.3.2",
+    "borsh 1.8.1",
+    "borsh-derive 1.8.1",
+    "cc 1.4.0",
+    "chunked_transfer 1.5.0",
+    "core_affinity 0.8.3",
+    "crc32fast 1.5.0",
+    "curl 0.4.50",
+    "curl-sys 0.4.90+curl-8.21.0",
+    "defmt 1.1.1",
+    "defmt-macros 1.1.1",
+    "defmt-parser 1.0.0"
+   ],
+   "not_run": [],
+   "headline": [],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": null
+  },
+  {
+   "repo": "tempoxyz/tempo",
+   "stars": 1048,
+   "release": "tempo/v1.19.0",
+   "commit": "697ea978e6a1914b2740365b293b890f865b9f57",
+   "sbom_asset": "https://github.com/tempoxyz/tempo/releases/download/tempo/v1.19.0/tempo-v1.19.0-x86_64-unknown-linux-gnu.tar.gz.spdx.json",
+   "sbom_file": "tempo-v1.19.0-x86_64-unknown-linux-gnu.tar.gz.spdx.json",
+   "sbom_generator": "syft-1.51.1",
+   "sbom_components": 0,
+   "checked_against": [
+    "Cargo.lock at the release tag (1348 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 1304,
+   "counts": {
+    "omitted": 1296,
+    "omitted-build": 0,
+    "vendored-c": 6,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 0,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 1,
+    "no-license": 1
+   },
+   "phantom_feature_and_platform_robust": 0,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.47.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L1932",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "bzip2",
+     "version": "1.0.8",
+     "detail": "crate bzip2-sys 0.1.13+1.0.8 links it: its bundled source, or the system library when the build host has one; no SBOM component names bzip2",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L2838",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "rocksdb",
+     "version": "10.4.2",
+     "detail": "crate librocksdb-sys 0.17.3+10.4.2 compiles it from source; no SBOM component names rocksdb",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L7183",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "lz4",
+     "version": "1.10.0",
+     "detail": "crate lz4-sys 1.11.1+lz4-1.10.0 compiles it from source; no SBOM component names lz4",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L7357",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "jemalloc",
+     "version": "5.3.0",
+     "detail": "crate tikv-jemalloc-sys 0.6.1+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7 compiles it from source; no SBOM component names jemalloc",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L15289",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.2+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L17787",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "crypto-bigint",
+     "version": "0.7.6",
+     "detail": "crypto-bigint 0.7.6 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L4070",
+     "registry": "https://index.crates.io/cr/yp/crypto-bigint",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    },
+    {
+     "check": "omitted",
+     "component": "addr2line",
+     "version": "0.25.1",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L6",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "adler2",
+     "version": "2.0.1",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L15",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "adler32",
+     "version": "1.2.0",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L21",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "aead",
+     "version": "0.5.2",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L27",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "aead",
+     "version": "0.6.1",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L37",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "aes",
+     "version": "0.8.4",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L47",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "aes",
+     "version": "0.9.4",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L58",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "aes-gcm",
+     "version": "0.10.3",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L69",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "aes-gcm",
+     "version": "0.11.1",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L83",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "age",
+     "version": "0.11.5",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L97",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "age-core",
+     "version": "0.11.0",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L123",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "ahash",
+     "version": "0.8.12",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L140",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "aho-corasick",
+     "version": "1.1.5",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L153",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "aliasable",
+     "version": "0.1.3",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L162",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    },
+    {
+     "check": "omitted",
+     "component": "aligned-vec",
+     "version": "0.6.4",
+     "detail": "in the build, not in the SBOM",
+     "evidence": "https://github.com/tempoxyz/tempo/blob/697ea978e6a1914b2740365b293b890f865b9f57/Cargo.lock#L168",
+     "risk": "Shipped code the SBOM does not list is invisible to every CVE and license scan run on it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": null
+  },
+  {
+   "repo": "thin-edge/thin-edge.io",
+   "stars": 289,
+   "release": "2.1.0",
+   "commit": "35bd52846edde1bce7ac3648da875c0f962d9cf3",
+   "sbom_asset": "https://github.com/thin-edge/thin-edge.io/releases/download/2.1.0/tedge.cdx.json",
+   "sbom_file": "tedge.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 546,
+   "checked_against": [
+    "cargo tree -e normal,build -p tedge --target all (515 crates)",
+    "Cargo.lock at the release tag (685 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 60,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 12,
+    "vendored-c": 0,
+    "version-drift": 2,
+    "hash-drift": 0,
+    "phantom": 46,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 0,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 21,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "assert-json-diff 2.0.2",
+    "assert_matches 1.5.0",
+    "aws-lc-rs 1.18.2",
+    "aws-lc-sys 0.46.0",
+    "bit-vec 0.9.1",
+    "difflib 0.4.0",
+    "embedded-io 0.4.0",
+    "embedded-io 0.6.1",
+    "float-cmp 0.10.0",
+    "iddqd 0.4.6",
+    "lru-slab 0.1.3",
+    "normalize-line-endings 0.3.0",
+    "quinn 0.11.12",
+    "quinn-proto 0.11.19",
+    "quinn-udp 0.5.16"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "version-drift",
+     "component": "object",
+     "version": "0.39.1",
+     "detail": "the build uses 0.39.1, the SBOM says 0.40.0",
+     "evidence": "https://github.com/thin-edge/thin-edge.io/blob/35bd52846edde1bce7ac3648da875c0f962d9cf3/Cargo.lock#L3552",
+     "risk": "Vulnerability matching runs on the SBOM's version, not the one that was built: a CVE fixed or introduced between the two is reported wrong."
+    },
+    {
+     "check": "version-drift",
+     "component": "shlex",
+     "version": "1.3.0",
+     "detail": "the build uses 1.3.0, the SBOM says 2.0.1",
+     "evidence": "https://github.com/thin-edge/thin-edge.io/blob/35bd52846edde1bce7ac3648da875c0f962d9cf3/Cargo.lock#L4995",
+     "risk": "Vulnerability matching runs on the SBOM's version, not the one that was built: a CVE fixed or introduced between the two is reported wrong."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package tedge",
+   "scope_note": null
+  },
+  {
+   "repo": "xybrid-ai/xybrid",
+   "stars": 526,
+   "release": "v0.20.0",
+   "commit": "1e98d9fe86ddeab828c46a824c7ac4d42c1f32c5",
+   "sbom_asset": "https://github.com/xybrid-ai/xybrid/releases/download/v0.20.0/xybrid-cli-v0.20.0.cdx.json",
+   "sbom_file": "xybrid-cli-v0.20.0.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.10",
+   "sbom_components": 396,
+   "checked_against": [
+    "cargo tree -e normal,build -p xybrid-cli --target x86_64-unknown-linux-gnu (344 crates)",
+    "Cargo.lock at the release tag (665 packages)",
+    "source tree (3 vendored C/C++ libraries)"
+   ],
+   "result": "fail",
+   "failing_findings": 59,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 4,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 53,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 1,
+    "no-license": 1
+   },
+   "phantom_feature_and_platform_robust": 28,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "cfg_aliases 0.2.2",
+    "chacha20 0.10.2",
+    "core_detect 1.0.0",
+    "cpufeatures 0.3.1",
+    "dyn-clone 1.0.20",
+    "futures-io 0.3.34",
+    "lock_api 0.4.14",
+    "lru-slab 0.1.3",
+    "parking_lot 0.12.5",
+    "parking_lot_core 0.9.12",
+    "proptest 1.12.0",
+    "quinn 0.11.12",
+    "quinn-proto 0.11.18",
+    "quinn-udp 0.5.15",
+    "rand 0.10.2"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.0+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/xybrid-ai/xybrid/blob/1e98d9fe86ddeab828c46a824c7ac4d42c1f32c5/Cargo.lock#L6883",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "llama-cpp",
+     "version": null,
+     "detail": "vendor/llama-cpp (git submodule, not checked out); no SBOM component names llama-cpp",
+     "evidence": "vendor/llama-cpp (git submodule, not checked out)",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "ort-ios",
+     "version": null,
+     "detail": "vendor/ort-ios (12 C/C++ files); no SBOM component names ort-ios",
+     "evidence": "vendor/ort-ios (12 C/C++ files)",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "whisper-cpp",
+     "version": null,
+     "detail": "vendor/whisper-cpp (git submodule, not checked out); no SBOM component names whisper-cpp",
+     "evidence": "vendor/whisper-cpp (git submodule, not checked out)",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "yoke-derive",
+     "version": "0.8.3",
+     "detail": "yoke-derive 0.8.3 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/xybrid-ai/xybrid/blob/1e98d9fe86ddeab828c46a824c7ac4d42c1f32c5/Cargo.lock#L6699",
+     "registry": "https://index.crates.io/yo/ke/yoke-derive",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package xybrid-cli",
+   "scope_note": null
+  },
+  {
+   "repo": "yfedoseev/pdf_oxide",
+   "stars": 1202,
+   "release": "v0.3.78",
+   "commit": "ad49c4cb3638dc950a29350ef882161372fde473",
+   "sbom_asset": "https://github.com/yfedoseev/pdf_oxide/releases/download/v0.3.78/sbom.cdx.json",
+   "sbom_file": "sbom.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 169,
+   "checked_against": [
+    "cargo tree -e normal,build -p pdf_oxide --target x86_64-unknown-linux-gnu (146 crates)",
+    "Cargo.lock at the release tag (528 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 24,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 0,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 24,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 0,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 5,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "bitflags 1.3.2",
+    "defmt 1.1.1",
+    "defmt-macros 1.1.1",
+    "defmt-parser 1.0.0",
+    "euclid 0.22.14"
+   ],
+   "not_run": [],
+   "headline": [],
+   "tool_error": null,
+   "scope": "package pdf_oxide",
+   "scope_note": null
+  },
+  {
+   "repo": "yvgude/lean-ctx",
+   "stars": 3955,
+   "release": "v3.12.6",
+   "commit": "5ae3dfff8294d674e80911d28ad55b8bd0930f7c",
+   "sbom_asset": "https://github.com/yvgude/lean-ctx/releases/download/v3.12.6/SBOM.cdx.json",
+   "sbom_file": "SBOM.cdx.json",
+   "sbom_generator": "cargo-cyclonedx 0.5.9",
+   "sbom_components": 559,
+   "checked_against": [
+    "cargo tree -e normal,build -p lean-ctx-engine --target all (534 crates)",
+    "Cargo.lock at the release tag (624 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 30,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 4,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 26,
+    "unpinned": 0,
+    "unhashed": 0,
+    "yanked": 0,
+    "no-license": 0
+   },
+   "phantom_feature_and_platform_robust": 26,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "base64ct 1.8.3",
+    "const-oid 0.9.6",
+    "der 0.7.10",
+    "embedded-io 0.4.0",
+    "embedded-io 0.6.1",
+    "foldhash 0.1.5",
+    "foreign-types 0.3.2",
+    "foreign-types-shared 0.1.1",
+    "hashbrown 0.15.5",
+    "lru-slab 0.1.2",
+    "openssl 0.10.81",
+    "openssl-macros 0.1.1",
+    "openssl-src 300.6.1+3.6.3",
+    "openssl-sys 0.9.117",
+    "pkcs8 0.10.2"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "aws-lc",
+     "version": null,
+     "detail": "crate aws-lc-sys 0.44.0 compiles it from source; no SBOM component names aws-lc",
+     "evidence": "https://github.com/yvgude/lean-ctx/blob/5ae3dfff8294d674e80911d28ad55b8bd0930f7c/rust/Cargo.lock#L216",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "sqlite",
+     "version": null,
+     "detail": "crate libsqlite3-sys 0.39.1 compiles it from source; no SBOM component names sqlite",
+     "evidence": "https://github.com/yvgude/lean-ctx/blob/5ae3dfff8294d674e80911d28ad55b8bd0930f7c/rust/Cargo.lock#L2774",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "jemalloc",
+     "version": "5.3.1",
+     "detail": "crate tikv-jemalloc-sys 0.7.1+5.3.1-0-g81034ce1f1373e37dc865038e1bc8eeecf559ce8 compiles it from source; no SBOM component names jemalloc",
+     "evidence": "https://github.com/yvgude/lean-ctx/blob/5ae3dfff8294d674e80911d28ad55b8bd0930f7c/rust/Cargo.lock#L4794",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "vendored-c",
+     "component": "zstd",
+     "version": "1.5.7",
+     "detail": "crate zstd-sys 2.1.2+zstd.1.5.7 compiles it from source; no SBOM component names zstd",
+     "evidence": "https://github.com/yvgude/lean-ctx/blob/5ae3dfff8294d674e80911d28ad55b8bd0930f7c/rust/Cargo.lock#L6473",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    }
+   ],
+   "tool_error": null,
+   "scope": "package lean-ctx-engine",
+   "scope_note": null
+  },
+  {
+   "repo": "zeroclaw-labs/zeroclaw",
+   "stars": 33508,
+   "release": "v0.9.0",
+   "commit": "6c78ba59bce6a3d5079cf0c0310488770e264ad4",
+   "sbom_asset": "https://github.com/zeroclaw-labs/zeroclaw/releases/download/v0.9.0/zeroclaw-v0.9.0-sbom.cdx.json",
+   "sbom_file": "zeroclaw-v0.9.0-sbom.cdx.json",
+   "sbom_generator": "syft 1.51.1",
+   "sbom_components": 1891,
+   "checked_against": [
+    "cargo tree -e normal,build --workspace --target x86_64-unknown-linux-gnu (642 crates)",
+    "Cargo.lock at the release tag (1301 packages)"
+   ],
+   "result": "fail",
+   "failing_findings": 2987,
+   "counts": {
+    "omitted": 0,
+    "omitted-build": 0,
+    "vendored-c": 1,
+    "version-drift": 0,
+    "hash-drift": 0,
+    "phantom": 815,
+    "unpinned": 44,
+    "unhashed": 597,
+    "yanked": 1,
+    "no-license": 1529
+   },
+   "phantom_feature_and_platform_robust": 277,
+   "phantom_in_no_lockfile": [],
+   "phantom_examples": [
+    "accessory 2.1.0",
+    "addr2line 0.26.1",
+    "aligned 0.4.3",
+    "alloca 0.4.0",
+    "anes 0.1.6",
+    "anyhow 1.0.101",
+    "approx 0.5.1",
+    "as-slice 0.2.1",
+    "assert-json-diff 2.0.2",
+    "assert_matches 1.5.0",
+    "assert_matches2 0.1.2",
+    "async-tungstenite 0.34.1",
+    "atomic 0.6.1",
+    "autocfg 1.5.0",
+    "bare-metal 0.2.5"
+   ],
+   "not_run": [],
+   "headline": [
+    {
+     "check": "vendored-c",
+     "component": "sqlite",
+     "version": null,
+     "detail": "crate libsqlite3-sys 0.38.2 compiles it from source; no SBOM component names sqlite",
+     "evidence": "https://github.com/zeroclaw-labs/zeroclaw/blob/6c78ba59bce6a3d5079cf0c0310488770e264ad4/Cargo.lock#L5450",
+     "risk": "CVE scanners (Grype, Trivy, Dependency-Track, GitHub) match advisories on the C library's own name or CPE. The SBOM only names the Rust wrapper crate, so an advisory against this library never matches this product."
+    },
+    {
+     "check": "yanked",
+     "component": "async-executor",
+     "version": "1.14.0",
+     "detail": "async-executor 1.14.0 is yanked on crates.io and is in the release's crate graph",
+     "evidence": "https://github.com/zeroclaw-labs/zeroclaw/blob/6c78ba59bce6a3d5079cf0c0310488770e264ad4/Cargo.lock#L460",
+     "registry": "https://index.crates.io/as/yn/async-executor",
+     "risk": "The release links a crate version its author withdrew from crates.io (yanks are for broken or vulnerable releases); nothing in the SBOM marks it."
+    }
+   ],
+   "tool_error": null,
+   "scope": "whole workspace",
+   "scope_note": null
+  }
+ ]
+}

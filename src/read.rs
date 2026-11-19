@@ -14,6 +14,8 @@ pub struct DocComponent {
     pub group: Option<String>,
     pub version: Option<String>,
     pub purl: Option<String>,
+    /// CPE 2.3 (or 2.2) name, when the document gives one.
+    pub cpe: Option<String>,
     /// IANA-style algorithm name -> lowercase hex
     pub hashes: BTreeMap<String, String>,
     pub license: Option<String>,
@@ -66,6 +68,7 @@ fn cdx_component(v: &Value, out: &mut Vec<DocComponent>) {
         group: s(&v["group"]),
         version: s(&v["version"]),
         purl: s(&v["purl"]),
+        cpe: s(&v["cpe"]),
         ..Default::default()
     };
     for h in v["hashes"].as_array().into_iter().flatten() {
@@ -267,8 +270,11 @@ pub fn from_spdx(v: &Value) -> Doc {
             ..Default::default()
         };
         for r in p["externalRefs"].as_array().into_iter().flatten() {
-            if r["referenceType"] == "purl" {
+            let t = r["referenceType"].as_str().unwrap_or("");
+            if t == "purl" {
                 c.purl = s(&r["referenceLocator"]);
+            } else if t.starts_with("cpe") {
+                c.cpe = s(&r["referenceLocator"]);
             }
             c.identifiers += 1;
         }

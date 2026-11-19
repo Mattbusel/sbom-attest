@@ -1,6 +1,6 @@
 use anyhow::{bail, Context, Result};
 use clap::{Args, Parser, Subcommand};
-use sbom_attest::{bundle, cargo_src, cdx, check, provenance, read, sign, spdx, util};
+use sbom_attest::{audit, bundle, cargo_src, cdx, check, provenance, read, sign, spdx, util};
 use sbom_attest::{generate, pretty, write, GenerateOptions};
 use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "sbom-attest",
     version,
-    about = "Build-time SBOMs, SBOM diffs and signed provenance for Rust and C/C++ builds"
+    about = "Your SBOM is a claim. sbom-attest audits it against what the build links, and builds SBOMs, diffs and signed provenance for Rust and C/C++"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -129,8 +129,85 @@ impl GenArgs {
     }
 }
 
+#[derive(Args, Clone)]
+struct AuditArgs {
+    /// The published SBOM to verify (CycloneDX or SPDX JSON)
+    sbom: PathBuf,
+    /// Cargo.toml of the build (default: ./Cargo.toml when it exists)
+    #[arg(long)]
+    manifest_path: Option<PathBuf>,
+    /// Cargo.lock to check against (default: next to the workspace manifest)
+    #[arg(long)]
+    lockfile: Option<PathBuf>,
+    /// Check against Cargo.lock only, without resolving the graph with cargo tree
+    /// (dev-only and other-platform crates then count as built)
+    #[arg(long)]
+    lockfile_only: bool,
+    /// Workspace package the SBOM describes (default: the whole workspace)
+    #[arg(short, long)]
+    package: Option<String>,
+    /// Target the SBOM describes: `auto` (the target the SBOM records, as
+    /// cargo-cyclonedx does, else the host), a triple, `all` (every platform) or `host`
+    #[arg(long, default_value = "auto")]
+    target: String,
+    /// Cargo features the release was built with (comma separated)
+    #[arg(long, value_delimiter = ',')]
+    features: Vec<String>,
+    #[arg(long)]
+    all_features: bool,
+    #[arg(long)]
+    no_default_features: bool,
+    /// Pass --locked to cargo
+    #[arg(long)]
+    locked: bool,
+    /// Pass --offline to cargo and skip the registry (the yanked check then fails as
+    /// not run, unless waived)
+    #[arg(long)]
+    offline: bool,
+    /// A released binary: its cargo-auditable dependency list is checked against the
+    /// SBOM when no Cargo.toml is given
+    #[arg(long)]
+    binary: Option<PathBuf>,
+    /// compile_commands.json of the C/C++ build
+    #[arg(long)]
+    compile_commands: Option<PathBuf>,
+    /// Verbose build log of the C/C++ build
+    #[arg(long)]
+    build_log: Option<PathBuf>,
+    /// Linker map (GNU ld -Map or lld --Map); repeatable
+    #[arg(long = "link-map")]
+    link_maps: Vec<PathBuf>,
+    /// Source tree to scan for vendored C/C++ (default: the workspace root, else .)
+    #[arg(long)]
+    source_dir: Option<PathBuf>,
+    /// Do not scan the source tree for vendored C/C++
+    #[arg(long)]
+    no_source_scan: bool,
+    /// Skip a check and say so loudly; repeatable or comma separated. One of:
+    /// omitted, omitted-build, vendored-c, version-drift, hash-drift, phantom,
+    /// unpinned, unhashed, yanked, no-license
+    #[arg(long = "waive", value_delimiter = ',')]
+    waive: Vec<String>,
+    /// Sparse index of the crates.io registry
+    #[arg(long, default_value = "https://index.crates.io")]
+    index_url: String,
+    /// Output on stdout: md or json
+    #[arg(long, default_value = "md")]
+    format: String,
+    /// Also append the Markdown report to this file (e.g. $GITHUB_STEP_SUMMARY)
+    #[arg(long)]
+    summary: Option<PathBuf>,
+    /// Also write the JSON report here
+    #[arg(long)]
+    json: Option<PathBuf>,
+}
+
 #[derive(Subcommand)]
 enum Cmd {
+    /// Verify a published SBOM against what the build links. Fails on any drift,
+    /// omission, phantom, unpinned or yanked dependency, missing license or
+    /// unnamed vendored C/C++ unless that check is waived with --waive
+    Audit(Box<AuditArgs>),
     /// Generate CycloneDX 1.6 and/or SPDX 2.3 SBOMs
     Generate {
         #[command(flatten)]
@@ -172,8 +249,11 @@ enum Cmd {
         independent: PathBuf,
         #[arg(long, default_value = "md")]
         format: String,
-        /// Exit 1 when there are undeclared, unverified or mismatched components
+        /// Exit 0 even when the SBOMs disagree. The default (since 0.3.0) is to exit 1
         #[arg(long)]
+        report_only: bool,
+        /// Kept for compatibility: failing on findings is now the default
+        #[arg(long, hide = true)]
         fail_on_findings: bool,
     },
     /// Create a P-256 key pair (<prefix>.key, <prefix>.pub)
@@ -318,6 +398,11 @@ fn main() {
 fn run() -> Result<()> {
     let cli = Cli::parse();
     match cli.cmd {
+        Cmd::Audit(a) => {
+            if !run_audit(&a)? {
+                std::process::exit(1);
+            }
+        }
         Cmd::Generate {
             gen,
             cdx,
@@ -379,7 +464,8 @@ fn run() -> Result<()> {
             vendor,
             independent,
             format,
-            fail_on_findings,
+            report_only,
+            fail_on_findings: _,
         } => {
             let (v, _) = read::load(&vendor)?;
             let (i, _) = read::load(&independent)?;
@@ -392,8 +478,12 @@ fn run() -> Result<()> {
                     r.to_markdown(&util::slash(&vendor), &util::slash(&independent))
                 );
             }
-            if fail_on_findings && !r.clean() {
-                std::process::exit(1);
+            if !r.clean() {
+                if report_only {
+                    eprintln!("sbom-attest: --report-only: the SBOMs disagree, exiting 0 anyway");
+                } else {
+                    std::process::exit(1);
+                }
             }
         }
         Cmd::Keygen { out } => {
@@ -764,4 +854,204 @@ fn run_bundle(
         gaps
     );
     Ok(())
+}
+
+/// Collect the build evidence, run every check, print the report. Ok(false) = failed.
+fn run_audit(a: &AuditArgs) -> Result<bool> {
+    let waived: std::collections::BTreeSet<audit::Class> = a
+        .waive
+        .iter()
+        .filter(|w| !w.trim().is_empty())
+        .map(|w| audit::Class::parse(w))
+        .collect::<Result<_>>()?;
+    for c in &waived {
+        eprintln!(
+            "sbom-attest: WARNING: --waive {}: {}. The report says so.",
+            c.as_str(),
+            c.waiver_cost()
+        );
+    }
+    let (doc, raw) = read::load(&a.sbom)?;
+    let mut truth = audit::Truth::default();
+
+    // ./Cargo.toml is only assumed when no other build evidence was named
+    let manifest = a.manifest_path.clone().or_else(|| {
+        let p = PathBuf::from("Cargo.toml");
+        (a.lockfile.is_none() && a.binary.is_none() && p.is_file()).then_some(p)
+    });
+    let workspace_root = manifest
+        .as_ref()
+        .and_then(|m| cargo_workspace_root(m, a.offline));
+    let lock_path = a.lockfile.clone().or_else(|| {
+        let base = workspace_root
+            .clone()
+            .or_else(|| {
+                manifest
+                    .as_ref()
+                    .and_then(|m| m.parent().map(PathBuf::from))
+            })
+            .unwrap_or_else(|| PathBuf::from("."));
+        let p = base.join("Cargo.lock");
+        p.is_file().then_some(p)
+    });
+    if let Some(lp) = &lock_path {
+        let text =
+            std::fs::read_to_string(lp).with_context(|| format!("reading {}", lp.display()))?;
+        truth.lock = Some((util::slash(lp), audit::parse_lock(&text)));
+    }
+    if let (Some(m), false) = (&manifest, a.lockfile_only) {
+        let target = match a.target.as_str() {
+            "auto" => audit::recorded_target(&raw),
+            "host" => None,
+            t => Some(t.to_string()),
+        };
+        let go = audit::GraphOptions {
+            manifest_path: m.clone(),
+            package: a.package.clone(),
+            target: target.clone(),
+            features: a.features.clone(),
+            all_features: a.all_features,
+            no_default_features: a.no_default_features,
+            offline: a.offline,
+            locked: a.locked,
+        };
+        let g = audit::cargo_graph(&go)?;
+        let mut desc = String::from("cargo tree -e normal,build");
+        match &a.package {
+            Some(p) => desc.push_str(&format!(" -p {p}")),
+            None => desc.push_str(" --workspace"),
+        }
+        match &target {
+            Some(t) => desc.push_str(&format!(" --target {t}")),
+            None => desc.push_str(" (host)"),
+        }
+        if !a.features.is_empty() {
+            desc.push_str(&format!(" --features {}", a.features.join(",")));
+        }
+        if a.all_features {
+            desc.push_str(" --all-features");
+        }
+        if a.no_default_features {
+            desc.push_str(" --no-default-features");
+        }
+        truth.graph = Some((desc, g));
+    }
+    if let Some(b) = &a.binary {
+        let info = sbom_attest::binary::analyze(b)?;
+        match (&info.auditable, &truth.graph) {
+            (Some(pkgs), None) => {
+                let g = pkgs
+                    .iter()
+                    .filter(|p| !p.root)
+                    .map(|p| audit::GraphCrate {
+                        name: p.name.clone(),
+                        version: p.version.clone(),
+                        origin: match p.source.as_str() {
+                            "crates.io" => audit::Origin::CratesIo,
+                            "local" => audit::Origin::Path,
+                            "git" => audit::Origin::Git(String::new()),
+                            other => audit::Origin::Registry(other.to_string()),
+                        },
+                        build_only: p.build_only,
+                        features: Vec::new(),
+                    })
+                    .collect();
+                truth.graph = Some((format!("cargo-auditable data in {}", util::slash(b)), g));
+            }
+            (Some(_), Some(_)) => truth.notes.push(format!(
+                "{} carries cargo-auditable data; the cargo tree graph was used instead.",
+                util::slash(b)
+            )),
+            (None, _) => truth.notes.push(format!(
+                "{} has no cargo-auditable data (build it with `cargo auditable build` to make it checkable).",
+                util::slash(b)
+            )),
+        }
+    }
+    if a.compile_commands.is_some() || a.build_log.is_some() || !a.link_maps.is_empty() {
+        let root = a.source_dir.clone().unwrap_or_else(|| PathBuf::from("."));
+        let mut opts = GenerateOptions::cc(root, a.compile_commands.clone().unwrap_or_default());
+        opts.compile_commands = a.compile_commands.clone();
+        opts.build_log = a.build_log.clone();
+        opts.link_maps = a.link_maps.clone();
+        opts.binary = a.binary.clone();
+        let inv = generate(&opts)?;
+        for c in inv.components.values() {
+            let third_party = c.id.starts_with("deb:")
+                || (c.id.starts_with("src:") && !c.name.ends_with("-native"))
+                || (c.id.starts_with("file:")
+                    && !c.properties.contains_key("sbom-attest:built-by-this-build"));
+            if third_party {
+                truth.native.push(audit::NativeComponent {
+                    name: c.name.clone(),
+                    version: c.version.clone(),
+                    evidence: c.evidence.iter().cloned().collect::<Vec<_>>().join(", "),
+                });
+            }
+        }
+    }
+    if !a.no_source_scan {
+        let dir = a
+            .source_dir
+            .clone()
+            .or(workspace_root.clone())
+            .unwrap_or_else(|| PathBuf::from("."));
+        truth.vendored = audit::scan_vendored(&dir);
+    }
+
+    let names = audit::crates_io_names(&doc, &truth);
+    let facts = if a.offline {
+        Err("--offline: the crates.io index was not queried".to_string())
+    } else {
+        audit::fetch_index(&names, &a.index_url).map_err(|e| format!("{e:#}"))
+    };
+    let report = audit::audit(
+        &util::slash(&a.sbom),
+        &doc,
+        &truth,
+        facts.as_ref().map_err(|e| e.clone()),
+        &audit::AuditOptions { waived },
+    );
+    let md = report.to_markdown();
+    if a.format == "json" {
+        println!("{}", serde_json::to_string_pretty(&report.to_json())?);
+    } else {
+        print!("{md}");
+    }
+    if let Some(p) = &a.summary {
+        use std::io::Write;
+        let mut f = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(p)
+            .with_context(|| format!("opening {}", p.display()))?;
+        f.write_all(md.as_bytes())?;
+    }
+    if let Some(p) = &a.json {
+        write(p, &pretty(&report.to_json()))?;
+    }
+    eprintln!(
+        "sbom-attest audit: {} ({} failing finding(s), {} waived check(s))",
+        if report.passed() { "PASS" } else { "FAIL" },
+        report.failures(),
+        report.waived.len()
+    );
+    Ok(report.passed())
+}
+
+fn cargo_workspace_root(manifest: &Path, offline: bool) -> Option<PathBuf> {
+    let mut cmd =
+        std::process::Command::new(std::env::var("CARGO").unwrap_or_else(|_| "cargo".into()));
+    cmd.args(["locate-project", "--workspace", "--message-format", "plain"])
+        .arg("--manifest-path")
+        .arg(manifest);
+    if offline {
+        cmd.arg("--offline");
+    }
+    let out = cmd.output().ok()?;
+    if !out.status.success() {
+        return None;
+    }
+    let p = PathBuf::from(String::from_utf8_lossy(&out.stdout).trim());
+    p.parent().map(PathBuf::from)
 }

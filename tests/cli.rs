@@ -261,6 +261,174 @@ fn diff_flags_an_undeclared_component() {
     let r: Value = serde_json::from_slice(&o.stdout).unwrap();
     assert_eq!(r["undeclared"][0]["name"], "y");
     assert_eq!(r["unverified"][0]["name"], "ghost");
+    // failing is the default now; --report-only is the explicit opt-out
+    let o = bin()
+        .arg("diff")
+        .arg("--vendor")
+        .arg(&vpath)
+        .arg("--independent")
+        .arg(&ours)
+        .output()
+        .unwrap();
+    assert_eq!(o.status.code(), Some(1));
+    let o = bin()
+        .arg("diff")
+        .arg("--vendor")
+        .arg(&vpath)
+        .arg("--independent")
+        .arg(&ours)
+        .arg("--report-only")
+        .output()
+        .unwrap();
+    assert_eq!(o.status.code(), Some(0));
+    assert!(String::from_utf8_lossy(&o.stderr).contains("--report-only"));
+}
+
+const AUDIT_LOCK: &str = r#"version = 4
+
+[[package]]
+name = "app"
+version = "0.1.0"
+dependencies = ["serde", "zstd-sys"]
+
+[[package]]
+name = "serde"
+version = "1.0.210"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aaaa"
+
+[[package]]
+name = "zstd-sys"
+version = "2.0.13+zstd.1.5.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbbb"
+"#;
+
+fn audit_sbom(dir: &Path, components: Value) -> PathBuf {
+    let doc = serde_json::json!({
+        "bomFormat": "CycloneDX", "specVersion": "1.6", "version": 1,
+        "metadata": {"component": {"type": "application", "name": "app", "version": "0.1.0",
+                                   "licenses": [{"expression": "MIT"}]}},
+        "components": components,
+    });
+    let p = dir.join("published.cdx.json");
+    std::fs::write(&p, serde_json::to_vec(&doc).unwrap()).unwrap();
+    p
+}
+
+/// A published SBOM that leaves out a crate and the C library a -sys crate compiles
+/// in fails by default; every waiver is announced.
+#[test]
+fn audit_fails_a_lying_sbom_by_default() {
+    let out = tmp("audit");
+    let lock = out.join("Cargo.lock");
+    std::fs::write(&lock, AUDIT_LOCK).unwrap();
+    let sbom = audit_sbom(
+        &out,
+        serde_json::json!([
+            {"type": "library", "name": "serde", "version": "1.0.210",
+             "purl": "pkg:cargo/serde@1.0.210", "licenses": [{"expression": "MIT OR Apache-2.0"}],
+             "hashes": [{"alg": "SHA-256", "content": "aaaa"}]}
+        ]),
+    );
+    let base = |c: &mut Command| {
+        c.arg("audit")
+            .arg(&sbom)
+            .arg("--lockfile")
+            .arg(&lock)
+            .arg("--source-dir")
+            .arg(&out)
+            .arg("--offline");
+    };
+    let mut c = bin();
+    base(&mut c);
+    let o = c.args(["--format", "json"]).output().unwrap();
+    assert_eq!(
+        o.status.code(),
+        Some(1),
+        "{}",
+        String::from_utf8_lossy(&o.stderr)
+    );
+    let r: Value = serde_json::from_slice(&o.stdout).unwrap();
+    assert_eq!(r["result"], "fail");
+    let found: Vec<(String, String)> = r["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|f| {
+            (
+                f["check"].as_str().unwrap().into(),
+                f["name"].as_str().unwrap().into(),
+            )
+        })
+        .collect();
+    assert!(
+        found.contains(&("omitted".into(), "zstd-sys".into())),
+        "{found:?}"
+    );
+    assert!(
+        found.contains(&("vendored-c".into(), "zstd".into())),
+        "{found:?}"
+    );
+    assert_eq!(r["notRun"][0]["check"], "yanked");
+
+    // waiving is explicit, loud and recorded in the report
+    let mut c = bin();
+    base(&mut c);
+    let o = c
+        .args(["--waive", "omitted,vendored-c", "--waive", "yanked"])
+        .output()
+        .unwrap();
+    assert_eq!(
+        o.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&o.stdout)
+    );
+    let err = String::from_utf8_lossy(&o.stderr);
+    assert!(err.contains("WARNING: --waive omitted"), "{err}");
+    let md = String::from_utf8_lossy(&o.stdout);
+    assert!(md.starts_with("# sbom-attest audit: PASS"), "{md}");
+    assert!(md.contains("This SBOM was not verified for"));
+
+    // an unknown check name is an error, not a silent pass
+    let mut c = bin();
+    base(&mut c);
+    let o = c.args(["--waive", "everything"]).output().unwrap();
+    assert_eq!(o.status.code(), Some(2));
+}
+
+/// The SBOM sbom-attest generates for a workspace passes its own audit against the
+/// resolved crate graph.
+#[test]
+fn audit_passes_its_own_sbom() {
+    let out = tmp("audit-self");
+    let manifest = fixture("target-cfg-features/app/Cargo.toml");
+    let ours = out.join("ours.cdx.json");
+    run_ok(
+        bin()
+            .arg("generate")
+            .arg("--manifest-path")
+            .arg(&manifest)
+            .args(["--offline", "--target", "x86_64-unknown-linux-gnu", "--cdx"])
+            .arg(&ours),
+    );
+    let md = run_ok(
+        bin()
+            .arg("audit")
+            .arg(&ours)
+            .arg("--manifest-path")
+            .arg(&manifest)
+            .args([
+                "--offline",
+                "--target",
+                "x86_64-unknown-linux-gnu",
+                "--waive",
+                "yanked,no-license",
+            ]),
+    );
+    assert!(md.starts_with("# sbom-attest audit: PASS"), "{md}");
+    assert!(md.contains("cargo tree -e normal,build --workspace --target x86_64-unknown-linux-gnu"));
 }
 
 #[test]

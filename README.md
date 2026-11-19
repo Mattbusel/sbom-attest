@@ -1,10 +1,87 @@
-# sbom-attest: your SBOM probably describes a build you didn't ship
+# sbom-attest: your SBOM is a lie until the build proves it
 
 [![crates.io](https://img.shields.io/crates/v/sbom-attest.svg)](https://crates.io/crates/sbom-attest)
 [![docs.rs](https://docs.rs/sbom-attest/badge.svg)](https://docs.rs/sbom-attest)
 [![CI](https://github.com/Mattbusel/sbom-attest/actions/workflows/ci.yml/badge.svg)](https://github.com/Mattbusel/sbom-attest/actions/workflows/ci.yml)
 
-An SBOM generated from the source tree describes what could have been built, not what was. In one automotive release, the binary was built with extra features and the SBOM without them, so it was missing 44 components, axum, hyper and tungstenite among them ([merged fix](https://github.com/eclipse-kuksa/kuksa-databroker/pull/244)). C and C++ are worse: on an opendroneid-core-c build, syft 1.56.0 finds none of the vendored MAVLink library, the shared libraries or the system packages that went into the binary (checked in CI here). sbom-attest builds the SBOM from the build itself.
+Nobody checks a published SBOM against the build it claims to describe. On November 19
+2026 we took the SBOM that 32 Rust projects attach to their latest GitHub release
+(made by cargo-cyclonedx, syft, cargo-sbom, cdxgen and others) and checked each one
+against the `Cargo.lock` and crate graph of its own release tag. **All 32 fail.**
+
+- **23 of 32** build or link a C library into the release that the SBOM never names.
+  The SBOM lists the Rust wrapper (`openssl-src`, `curl-sys`, `zstd-sys`,
+  `aws-lc-sys`, `libsqlite3-sys`), so an OpenSSL, curl or SQLite advisory never
+  matches the product. One `x86_64-unknown-linux-gnu` SBOM alone omits OpenSSL 3.6.3,
+  curl 8.21.0, librdkafka 2.12.1, lz4 1.10.0, zstd 1.5.7, AWS-LC and zlib.
+- **19 of 32** ship a crate version that crates.io has yanked (async-executor 1.14.0,
+  spin 0.9.8, chacha20 0.10.1, crypto-bigint 0.7.6 ...), and no SBOM says so.
+- **29 of 32** declare crates the release cannot contain: outside the crate graph even
+  with `--all-features --target all`. cargo-cyclonedx reads `cargo metadata`, which
+  unifies features across the workspace, so one 282-component SBOM lists 62 crates
+  (termwiz, pest, palette ...) that cargo never compiles into that binary.
+- **2** list no dependencies at all for binaries whose `Cargo.lock` holds 819 and
+  1,296 third-party crates.
+
+Per-project data, with `Cargo.lock` line links and the SBOM asset URLs:
+[`reports/release-sboms-2026-11.json`](reports/release-sboms-2026-11.json). This is
+not about the maintainers: they ran the standard tools, and the standard tools do not
+look at the build.
+
+`sbom-attest audit` is the check, and it fails by default:
+
+```sh
+cargo install sbom-attest
+sbom-attest audit dist/app.cdx.json            # in the workspace the release was built from
+```
+
+| Check | Fails when |
+|---|---|
+| `omitted` | a crate the build links is not in the SBOM |
+| `omitted-build` | a proc macro or build-script dependency (code that runs during your build) is not in the SBOM |
+| `vendored-c` | a `-sys`/`-src` crate builds a C library in (`openssl-src 300.6.1+3.6.3` is OpenSSL 3.6.3), or `third_party/`, `vendor/`, `external/` or a submodule holds C/C++, and no SBOM component names that library |
+| `version-drift` | the SBOM's version is not the one `Cargo.lock` or the C build uses |
+| `hash-drift` | the SBOM's SHA-256 is not the one `Cargo.lock` or crates.io pins |
+| `phantom` | the SBOM declares a crate the build does not compile (not in `Cargo.lock`, or outside the graph for the target and features) |
+| `unpinned` | a component has no exact version |
+| `unhashed` | a component has no hash although `Cargo.lock` pins one |
+| `yanked` | the build uses a crate version yanked from crates.io |
+| `no-license` | a component has no license |
+
+What the build contains comes from the build's own evidence: `Cargo.lock`, the graph
+`cargo tree` resolves for the target and features (`--target auto` reads the target
+cargo-cyclonedx records in the SBOM), the cargo-auditable list in a released
+`--binary`, `--compile-commands` / `--build-log` / `--link-map` for C and C++, and the
+source tree. A check that cannot run fails too: `--offline` skips crates.io, so
+`yanked` fails as not run. An unverified claim is not a pass.
+
+The opt-out is loud on purpose. `--waive <check>` is the only way to turn a check off;
+each waiver is printed as a warning and written into the report, so whoever reads it
+knows exactly what was not verified. Exit codes: 0 pass, 1 findings, 2 error.
+
+```sh
+sbom-attest audit sbom.cdx.json --package my-app --target x86_64-unknown-linux-gnu \
+  --features tls,metrics --json audit.json --summary audit.md
+sbom-attest audit sbom.cdx.json --binary target/release/my-app   # cargo-auditable data, no Cargo.toml needed
+sbom-attest audit sbom.cdx.json --waive no-license                # warns: this run accepts components without a license
+```
+
+### GitHub Action
+
+```yaml
+- run: cargo cyclonedx --format json      # or syft, cargo-sbom: anything that writes CycloneDX/SPDX JSON
+- uses: Mattbusel/sbom-attest@v0.3.0
+  with:
+    sbom: my-app.cdx.json
+    package: my-app            # optional: the workspace package the SBOM describes
+    features: tls,metrics      # optional: the features the release is built with
+    # waive: no-license        # optional; written into the job summary when used
+```
+
+The report goes to the job summary and the job fails on any finding. This repository
+runs the Action on its own SBOM in CI, and it passes.
+
+## Build an SBOM from the build
 
 Build-time SBOMs for mixed Rust and C/C++ builds, including embedded firmware, from
 one static binary:
@@ -83,7 +160,7 @@ Generate SBOMs from your own build tool, xtask or release script:
 
 ```toml
 [dependencies]
-sbom-attest = { version = "0.2", default-features = false }  # anyhow, serde_json, sha2 only
+sbom-attest = { version = "0.3", default-features = false }  # anyhow, serde_json, sha2 only
 ```
 
 ```rust
@@ -180,6 +257,13 @@ decides. Missing evidence for the core paragraphs is listed under `gaps`.
   binary and rejects them for a different file.
 
 ## Limits
+
+- `audit` knows which `-sys`/`-src` crates carry C source from the `+<upstream
+  version>` convention, a list of common crates and their bundling features; a crate
+  that vendors C without any of these is not caught. Vendored C/C++ in the source tree
+  is matched to SBOM components by directory name.
+- `audit` matches crates by name and version (purl when present). Graph checks need
+  `cargo tree` to resolve the workspace, so registry access or a vendored registry.
 
 - Linker maps: GNU ld and lld formats. MSVC, IAR and Keil maps are not parsed yet.
 - Package ownership: `dpkg` only (no rpm or apk yet). Licenses of Debian packages

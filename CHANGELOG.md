@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.3.0
+
+Breaking: sbom-attest now fails by default when an SBOM does not match the build.
+
+**Why.** A published SBOM is a claim nobody checks. Generators read `cargo metadata`
+(feature-unified across the whole workspace and every platform), the source tree, or
+the lockfile, and none of them is the build. The result ships as the record of what is
+in the product, and CVE and license decisions are made from it. A check that only
+reports and exits 0 changes nothing, so the checks now fail unless they are switched
+off by name.
+
+- New `sbom-attest audit <sbom>`: verifies a published CycloneDX or SPDX SBOM against
+  the build's own evidence: `Cargo.lock` (versions and SHA-256), the crate graph
+  `cargo tree` resolves for the target and features (`--target auto` reads the target
+  cargo-cyclonedx records), the cargo-auditable list in a released `--binary`,
+  `compile_commands.json` / build logs / linker maps for C/C++, the C libraries that
+  `-sys`/`-src` crates compile from source (`openssl-src 300.3.1+3.3.1` means OpenSSL
+  3.3.1 is in the binary), and vendored C/C++ under `third_party/`, `vendor/`,
+  `external/`, `deps/` and git submodules. Ten checks: `omitted`, `omitted-build`,
+  `vendored-c`, `version-drift`, `hash-drift`, `phantom`, `unpinned`, `unhashed`,
+  `yanked` (crates.io sparse index) and `no-license`.
+- Every check fails by default. `--waive <check>` is the only way off; each waiver is
+  printed as a warning and written into the report. A check that cannot run (for
+  example the yanked check under `--offline`) fails too, because an unverified claim
+  is not a passing one. Exit codes: 0 pass, 1 findings, 2 error.
+- `diff` now exits 1 when the SBOMs disagree. `--report-only` restores the old exit 0;
+  `--fail-on-findings` is accepted and does nothing.
+- GitHub Action (`uses: Mattbusel/sbom-attest@v0.3.0`): runs the audit, writes the
+  report to the job summary, and fails the job on findings.
+- Library: `audit` module (`audit`, `Truth`, `AuditReport`, `Class`, `Finding`,
+  `parse_lock`, `cargo_graph`, `scan_vendored`, `vendored_by_crate`, `fetch_index`);
+  `read::DocComponent` gains `cpe` (a struct-literal change).
+
 ## 0.2.1
 
 - Fix: a binary's DT_NEEDED libraries are only resolved to library files built for
