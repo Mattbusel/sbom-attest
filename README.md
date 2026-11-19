@@ -1,8 +1,10 @@
-# sbom-attest
+# sbom-attest: your SBOM probably describes a build you didn't ship
 
 [![crates.io](https://img.shields.io/crates/v/sbom-attest.svg)](https://crates.io/crates/sbom-attest)
 [![docs.rs](https://docs.rs/sbom-attest/badge.svg)](https://docs.rs/sbom-attest)
 [![CI](https://github.com/Mattbusel/sbom-attest/actions/workflows/ci.yml/badge.svg)](https://github.com/Mattbusel/sbom-attest/actions/workflows/ci.yml)
+
+An SBOM generated from the source tree describes what could have been built, not what was. In one automotive release, the binary was built with extra features and the SBOM without them, so it was missing 44 components, axum, hyper and tungstenite among them ([merged fix](https://github.com/eclipse-kuksa/kuksa-databroker/pull/244)). C and C++ are worse: on an opendroneid-core-c build, syft 1.56.0 finds none of the vendored MAVLink library, the shared libraries or the system packages that went into the binary (checked in CI here). sbom-attest builds the SBOM from the build itself.
 
 Build-time SBOMs for mixed Rust and C/C++ builds, including embedded firmware, from
 one static binary:
