@@ -1,5 +1,5 @@
 name: sbom-attest audit
-description: Fail the build when your published SBOM does not match what the build links (omitted, phantom, drifted, unpinned or yanked dependencies, missing licenses, unnamed vendored C/C++).
+description: "Fail the build when your published SBOM does not match what the build links (omitted, phantom, drifted, unpinned or yanked dependencies, missing licenses, unnamed vendored C/C++)."
 author: Tensorust
 branding:
   icon: shield
@@ -7,14 +7,14 @@ branding:
 
 inputs:
   sbom:
-    description: Path to the SBOM you publish (CycloneDX or SPDX JSON).
+    description: "Path to the SBOM you publish (CycloneDX or SPDX JSON)."
     required: true
   manifest-path:
-    description: Cargo.toml of the build the SBOM describes.
+    description: "Cargo.toml of the build the SBOM describes."
     required: false
     default: Cargo.toml
   package:
-    description: Workspace package the SBOM describes (default: the whole workspace).
+    description: "Workspace package the SBOM describes (default: the whole workspace)."
     required: false
     default: ""
   target:
@@ -22,7 +22,7 @@ inputs:
     required: false
     default: auto
   features:
-    description: Cargo features the release is built with (comma separated).
+    description: "Cargo features the release is built with (comma separated)."
     required: false
     default: ""
   waive:
@@ -30,20 +30,20 @@ inputs:
     required: false
     default: ""
   args:
-    description: Extra arguments for `sbom-attest audit` (e.g. --binary target/release/app, --compile-commands build/compile_commands.json).
+    description: "Extra arguments for `sbom-attest audit` (e.g. --binary target/release/app, --compile-commands build/compile_commands.json)."
     required: false
     default: ""
   version:
-    description: sbom-attest version to install.
+    description: "sbom-attest version to install."
     required: false
     default: "0.3.0"
 
 outputs:
   result:
-    description: pass or fail
+    description: "pass or fail"
     value: ${{ steps.audit.outputs.result }}
   report:
-    description: Path of the JSON report.
+    description: "Path of the JSON report."
     value: ${{ steps.audit.outputs.report }}
 
 runs:
