@@ -260,6 +260,7 @@ const KNOWN_LICENSES: &[&str] = &[
     "zlib-acknowledgement",
     "curl",
     "bzip2-1.0.6",
+    "blessing",
     "GPL-2.0",
     "GPL-3.0",
     "LGPL-2.1",
@@ -363,6 +364,7 @@ mod tests {
         assert!(spdx_expression_known("Apache-2.0 WITH LLVM-exception"));
         // webpki-roots 1.x ships under the Mozilla root data license
         assert!(spdx_expression_known("CDLA-Permissive-2.0"));
+        assert!(spdx_expression_known("blessing"));
         assert!(!spdx_expression_known("Custom-License"));
         assert!(!spdx_expression_known(""));
     }
