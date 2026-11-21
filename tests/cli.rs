@@ -646,7 +646,7 @@ fn several_packages_share_one_product_root() {
             ws.join(name).join("Cargo.toml"),
             format!(
                 "[package]\nname = \"{name}\"\nversion = \"1.2.3\"\nedition = \"2021\"\n\
-                 [dependencies]\n{dep} = {{ path = \"{fx}/{dep}\" }}\n"
+                 license = \"MIT OR Apache-2.0\"\n[dependencies]\n{dep} = {{ path = \"{fx}/{dep}\" }}\n"
             ),
         )
         .unwrap();
@@ -674,6 +674,12 @@ fn several_packages_share_one_product_root() {
     assert_eq!(names(&doc), ["a", "b", "x", "y"]);
     assert_eq!(doc["metadata"]["component"]["name"], "suite");
     assert_eq!(doc["metadata"]["component"]["version"], "1.2.3");
+    assert!(
+        doc["metadata"]["component"]["licenses"]
+            .to_string()
+            .contains("MIT OR Apache-2.0"),
+        "product root lost the packages' shared license"
+    );
     let root = doc["metadata"]["component"]["bom-ref"].as_str().unwrap();
     let deps = doc["dependencies"]
         .as_array()

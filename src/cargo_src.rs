@@ -446,6 +446,7 @@ pub fn scan(opts: &CargoOptions) -> Result<CargoScan> {
 
     let mut comps: BTreeMap<String, Component> = BTreeMap::new();
     let mut ids: Vec<Option<String>> = Vec::new();
+    let mut edges = BTreeSet::new();
     for n in &full {
         let Some(p) = resolve(n) else {
             ids.push(None);
@@ -469,10 +470,14 @@ pub fn scan(opts: &CargoOptions) -> Result<CargoScan> {
                 .into(),
             );
         }
+        let scope = c.scope;
         comps.entry(id.clone()).or_insert(c);
+        if let Some(v) = vendored_component(p, &n.features, scope) {
+            edges.insert((id.clone(), v.id.clone()));
+            comps.entry(v.id.clone()).or_insert(v);
+        }
         ids.push(Some(id));
     }
-    let mut edges = BTreeSet::new();
     for (a, b) in tree_edges(&full) {
         if let (Some(a), Some(b)) = (&ids[a], &ids[b]) {
             edges.insert((a.clone(), b.clone()));
@@ -515,6 +520,11 @@ pub fn scan(opts: &CargoOptions) -> Result<CargoScan> {
         root.version = root_pkgs[0].s("version").map(String::from);
         root.lang = Lang::Rust;
         root.evidence.insert("cargo-metadata".into());
+        // the product carries the packages' license when they all declare the same one
+        let licenses: BTreeSet<_> = root_pkgs.iter().map(|p| p.s("license")).collect();
+        if let [Some(l)] = licenses.into_iter().collect::<Vec<_>>()[..] {
+            root.license = Some(spdx_expression(l));
+        }
         for p in &root_pkgs {
             let cid = cargo_id(
                 p.s("name").unwrap_or_default(),
@@ -537,6 +547,79 @@ pub fn scan(opts: &CargoOptions) -> Result<CargoScan> {
         components: comps.into_values().collect(),
         edges,
         workspace_root,
+    })
+}
+
+/// SPDX licenses of C libraries that `-sys`/`-src` crates compile in.
+const VENDORED_LICENSES: &[(&str, &str)] = &[
+    ("sqlite", "blessing"),
+    ("openssl", "Apache-2.0"),
+    ("zlib", "Zlib"),
+    ("zstd", "BSD-3-Clause OR GPL-2.0-only"),
+    ("lz4", "BSD-2-Clause"),
+    ("bzip2", "bzip2-1.0.6"),
+    ("xz", "0BSD"),
+    ("jemalloc", "BSD-2-Clause"),
+    ("mimalloc", "MIT"),
+    ("curl", "curl"),
+    ("libssh2", "BSD-3-Clause"),
+    ("nghttp2", "MIT"),
+    ("aws-lc", "ISC AND (Apache-2.0 OR ISC)"),
+    ("boringssl", "ISC"),
+];
+
+/// The C library a `-sys`/`-src` crate compiles into the build, as its own component,
+/// so the SBOM names what CVE scanners look for (sqlite, not libsqlite3-sys).
+fn vendored_component(p: &Pkg, features: &[String], scope: Scope) -> Option<Component> {
+    let name = p.s("name")?;
+    let version = p.s("version")?;
+    let v = crate::audit::vendored_by_crate(name, version, features)?;
+    let dir = p.s("manifest_path").and_then(|m| Path::new(m).parent());
+    let lib_version = v
+        .version
+        .clone()
+        .or_else(|| dir.and_then(|d| bundled_version(&v.name, d)));
+    let mut c = Component::new(format!("vendored:{}", v.name), Kind::Library, &v.name);
+    c.version = lib_version;
+    c.lang = Lang::C;
+    c.scope = scope;
+    c.license = VENDORED_LICENSES
+        .iter()
+        .find(|(l, _)| *l == v.name)
+        .map(|(_, s)| s.to_string());
+    c.purl = Some(match &c.version {
+        Some(ver) => format!("pkg:generic/{}@{}", purl_escape(&v.name), purl_escape(ver)),
+        None => format!("pkg:generic/{}", purl_escape(&v.name)),
+    });
+    c.evidence.insert("cargo-tree".into());
+    c.properties.insert(
+        "sbom-attest:vendored-by".into(),
+        format!("{name} {version}"),
+    );
+    Some(c)
+}
+
+/// The version of a C library bundled in a crate's source, when its header states it.
+fn bundled_version(lib: &str, crate_dir: &Path) -> Option<String> {
+    let (header, define) = match lib {
+        "sqlite" => ("sqlite3/sqlite3.h", "SQLITE_VERSION"),
+        _ => return None,
+    };
+    parse_define_version(
+        &std::fs::read_to_string(crate_dir.join(header)).ok()?,
+        define,
+    )
+}
+
+fn parse_define_version(text: &str, define: &str) -> Option<String> {
+    text.lines().find_map(|l| {
+        let rest = l.trim().strip_prefix("#define")?.trim_start();
+        let rest = rest.strip_prefix(define)?;
+        if !rest.starts_with(char::is_whitespace) {
+            return None;
+        }
+        let v = rest.trim().trim_matches('"');
+        (!v.is_empty() && v.contains('.')).then(|| v.to_string())
     })
 }
 
@@ -587,6 +670,30 @@ pub fn apply(inv: &mut Inventory, scan: CargoScan) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn vendored_c_library_becomes_a_component() {
+        let sqlite = serde_json::json!({"name": "libsqlite3-sys", "version": "0.30.1"});
+        let pkg = Pkg { v: &sqlite };
+        assert!(vendored_component(&pkg, &[], Scope::Required).is_none());
+        let c = vendored_component(&pkg, &["bundled".into()], Scope::Required).unwrap();
+        assert_eq!(c.name, "sqlite");
+        assert_eq!(c.license.as_deref(), Some("blessing"));
+        assert_eq!(c.lang, Lang::C);
+        let openssl = serde_json::json!({"name": "openssl-src", "version": "300.3.1+3.3.1"});
+        let pkg = Pkg { v: &openssl };
+        let c = vendored_component(&pkg, &[], Scope::Required).unwrap();
+        assert_eq!(c.version.as_deref(), Some("3.3.1"));
+        assert_eq!(c.purl.as_deref(), Some("pkg:generic/openssl@3.3.1"));
+        assert_eq!(
+            parse_define_version(
+                "#define SQLITE_VERSION        \"3.46.0\"
+#define SQLITE_VERSION_NUMBER 3046000",
+                "SQLITE_VERSION"
+            ),
+            Some("3.46.0".into())
+        );
+    }
 
     #[test]
     fn parses_depth_prefixed_tree() {
