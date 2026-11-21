@@ -1498,8 +1498,29 @@ pub fn audit(
         }
     }
 
-    // unpinned and unlicensed components, root included
-    for c in doc.root.iter().chain(doc.components.iter()) {
+    // unpinned and unlicensed components, root included. A shared library the
+    // operating system provides at run time is not shipped: the build cannot pin it.
+    let platform: Vec<&str> = doc
+        .components
+        .iter()
+        .filter(|c| c.platform)
+        .map(|c| c.name.as_str())
+        .collect();
+    if !platform.is_empty() {
+        r.notes.push(format!(
+            "{} shared librar{} the operating system provides at run time ({}) {} not shipped with the artifact and {} not required to carry a version or license.",
+            platform.len(),
+            if platform.len() == 1 { "y" } else { "ies" },
+            platform.join(", "),
+            if platform.len() == 1 { "is" } else { "are" },
+            if platform.len() == 1 { "was" } else { "were" },
+        ));
+    }
+    for c in doc
+        .root
+        .iter()
+        .chain(doc.components.iter().filter(|c| !c.platform))
+    {
         let v = doc_version(c);
         if is_unpinned_version(v.as_deref()) {
             push(
@@ -1879,6 +1900,22 @@ source = "git+https://github.com/x/gitdep?rev=abc#abcdef0123"
         let md = r.to_markdown();
         assert!(md.contains("WAIVED"));
         assert!(md.contains("does NOT fail on yanked crates"));
+    }
+
+    #[test]
+    fn platform_libraries_need_no_version_or_license() {
+        let mut kernel32 = comp("KERNEL32.dll", None, None, None);
+        kernel32.platform = true;
+        let doc = Doc {
+            components: vec![kernel32, comp("libfoo.so.1", None, None, None)],
+            ..Default::default()
+        };
+        let facts = IndexFacts::new();
+        let r = audit("s", &doc, &truth(), Ok(&facts), &AuditOptions::default());
+        let m = classes(&r);
+        assert_eq!(m["unpinned"], vec!["libfoo.so.1"]);
+        assert_eq!(m["no-license"], vec!["libfoo.so.1"]);
+        assert!(r.notes.iter().any(|n| n.contains("(KERNEL32.dll)")));
     }
 
     #[test]

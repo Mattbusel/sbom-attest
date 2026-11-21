@@ -87,6 +87,9 @@ fn package(c: &Component, spdx_id: &str) -> Value {
             c.evidence.iter().cloned().collect::<Vec<_>>().join(",")
         ));
     }
+    if let Some(v) = c.properties.get("sbom-attest:provided-by") {
+        notes.push(format!("provided-by={v}"));
+    }
     if let Some(v) = c.properties.get("sbom-attest:memsafe") {
         notes.push(format!("memsafe={v}"));
     }

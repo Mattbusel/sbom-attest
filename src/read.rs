@@ -22,6 +22,9 @@ pub struct DocComponent {
     pub producer: Option<String>,
     pub identifiers: usize,
     pub build_only: bool,
+    /// Loaded from the operating system at run time, not shipped with the artifact
+    /// (sbom-attest's `provided-by=platform`).
+    pub platform: bool,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -110,6 +113,11 @@ fn cdx_component(v: &Value, out: &mut Vec<DocComponent>) {
     .filter(|x| !x.is_null())
     .count();
     c.build_only = v["scope"] == "excluded";
+    c.platform = v["properties"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .any(|p| p["name"] == "sbom-attest:provided-by" && p["value"] == "platform");
     let nested = v["components"].clone();
     out.push(c);
     for n in nested.as_array().into_iter().flatten() {
@@ -296,6 +304,9 @@ pub fn from_spdx(v: &Value) -> Doc {
                     .to_string()
             });
         c.build_only = build_only.contains(&c.reference);
+        c.platform = p["comment"]
+            .as_str()
+            .is_some_and(|n| n.split("; ").any(|x| x == "provided-by=platform"));
         if described.contains(&c.reference) && d.root.is_none() {
             d.root = Some(c);
         } else {

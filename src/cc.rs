@@ -1025,6 +1025,14 @@ pub fn scan(inv: &mut Inventory, opts: &CcOptions) -> Result<()> {
     Ok(())
 }
 
+/// Property naming who provides a component at run time; `platform` means the
+/// operating system the artifact runs on, not the artifact or its build.
+pub const PROVIDED_BY: &str = "sbom-attest:provided-by";
+
+fn mark_platform(c: &mut Component) {
+    c.properties.insert(PROVIDED_BY.into(), "platform".into());
+}
+
 /// Resolve `dynlib:*` components (from DT_NEEDED) to the component that ships the
 /// library: one already in the inventory with that file name (a shared library this
 /// build linked, or a package file seen at link time), else the file found on the
@@ -1048,6 +1056,7 @@ pub fn resolve_needed(
         .collect();
     let mut dirs: Vec<PathBuf> = runpaths.to_vec();
     dirs.extend(default_lib_dirs());
+    let system_dirs = default_lib_dirs();
     for id in ids {
         let soname = id["dynlib:".len()..].to_string();
         let suffix = format!("/{soname}");
@@ -1064,11 +1073,13 @@ pub fn resolve_needed(
             .map(|c| c.id.clone());
         let target = match existing {
             Some(t) => Some(t),
-            None => match dirs.iter().map(|d| d.join(&soname)).find(|p| {
-                p.is_file()
-                    && (machine.is_none() || elf_machine(p).is_none_or(|m| Some(m) == machine))
+            None => match dirs.iter().find_map(|d| {
+                let p = d.join(&soname);
+                (p.is_file()
+                    && (machine.is_none() || elf_machine(&p).is_none_or(|m| Some(m) == machine)))
+                .then(|| (system_dirs.contains(d) && !runpaths.contains(d), p))
             }) {
-                Some(p) => {
+                Some((system, p)) => {
                     let p = normalize(&p);
                     let fact = FileFact {
                         path: p.clone(),
@@ -1086,12 +1097,27 @@ pub fn resolve_needed(
                         &BTreeSet::new(),
                         use_dpkg,
                     )?;
-                    placed.get(&p).cloned()
+                    let placed = placed.get(&p).cloned();
+                    if system {
+                        if let Some(c) = placed.as_ref().and_then(|t| inv.components.get_mut(t)) {
+                            mark_platform(c);
+                        }
+                    }
+                    placed
                 }
                 None => None,
             },
         };
-        let Some(target) = target else { continue };
+        let Some(target) = target else {
+            // Not built here, not on the RUNPATH, not in the system library
+            // directories of this host: the operating system the artifact runs on
+            // provides it (a darwin framework, a Windows DLL, the target's libc when
+            // cross-compiling).
+            if let Some(c) = inv.components.get_mut(&id) {
+                mark_platform(c);
+            }
+            continue;
+        };
         if target == id {
             continue;
         }
