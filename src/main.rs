@@ -147,9 +147,10 @@ struct AuditArgs {
     /// (dev-only and other-platform crates then count as built)
     #[arg(long)]
     lockfile_only: bool,
-    /// Workspace package the SBOM describes (default: the whole workspace)
-    #[arg(short, long)]
-    package: Option<String>,
+    /// Workspace package the SBOM describes (default: the whole workspace); repeat
+    /// (or comma separate) for an SBOM that covers several packages' binaries
+    #[arg(short, long, value_delimiter = ',')]
+    package: Vec<String>,
     /// Target the SBOM describes: `auto` (the target the SBOM records, as
     /// cargo-cyclonedx does, else the host), a triple, `all` (every platform) or `host`
     #[arg(long, default_value = "auto")]
@@ -921,9 +922,11 @@ fn run_audit(a: &AuditArgs) -> Result<bool> {
         };
         let g = audit::cargo_graph(&go)?;
         let mut desc = String::from("cargo tree -e normal,build");
-        match &a.package {
-            Some(p) => desc.push_str(&format!(" -p {p}")),
-            None => desc.push_str(" --workspace"),
+        if a.package.is_empty() {
+            desc.push_str(" --workspace");
+        }
+        for p in &a.package {
+            desc.push_str(&format!(" -p {p}"));
         }
         match &target {
             Some(t) => desc.push_str(&format!(" --target {t}")),

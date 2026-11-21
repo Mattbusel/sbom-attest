@@ -1,6 +1,6 @@
 [package]
 name = "sbom-attest"
-version = "0.4.5"
+version = "0.4.6"
 edition = "2021"
 rust-version = "1.85"
 description = "Your SBOM is a lie until the build proves it. sbom-attest audit fails CI when a published SBOM disagrees with Cargo.lock, the compiled crate graph or vendored C/C++; also build-time CycloneDX/SPDX SBOMs, vendor diff, signed SLSA provenance"

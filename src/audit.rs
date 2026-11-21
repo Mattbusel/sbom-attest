@@ -264,7 +264,8 @@ pub struct GraphCrate {
 #[derive(Clone, Debug, Default)]
 pub struct GraphOptions {
     pub manifest_path: PathBuf,
-    pub package: Option<String>,
+    /// Workspace packages to resolve; empty means the whole workspace.
+    pub package: Vec<String>,
     /// A triple, `all` (every platform, what cargo-cyclonedx records by default) or
     /// None for the host.
     pub target: Option<String>,
@@ -293,10 +294,11 @@ fn run_tree(o: &GraphOptions, edges: &str) -> Result<String> {
         edges,
     ]);
     cmd.arg("--manifest-path").arg(&o.manifest_path);
-    if let Some(p) = &o.package {
-        cmd.arg("--package").arg(p);
-    } else {
+    if o.package.is_empty() {
         cmd.arg("--workspace");
+    }
+    for p in &o.package {
+        cmd.arg("--package").arg(p);
     }
     if let Some(t) = &o.target {
         cmd.arg("--target").arg(t);
