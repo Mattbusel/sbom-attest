@@ -331,7 +331,8 @@ pub struct CargoScan {
 pub fn scan(opts: &CargoOptions) -> Result<CargoScan> {
     let mut cmd = cargo();
     cmd.args(["metadata", "--format-version", "1"]);
-    if let Some(t) = &opts.target {
+    // `--target all` is a cargo tree spelling; cargo metadata has no filter for it.
+    if let Some(t) = opts.target.as_deref().filter(|t| *t != "all") {
         cmd.arg("--filter-platform").arg(t);
     }
     opts.common(&mut cmd);
