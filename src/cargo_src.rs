@@ -331,10 +331,10 @@ pub struct CargoScan {
 pub fn scan(opts: &CargoOptions) -> Result<CargoScan> {
     let mut cmd = cargo();
     cmd.args(["metadata", "--format-version", "1"]);
-    // `--target all` is a cargo tree spelling; cargo metadata has no filter for it.
-    if let Some(t) = opts.target.as_deref().filter(|t| *t != "all") {
-        cmd.arg("--filter-platform").arg(t);
-    }
+    // No --filter-platform: the graph comes from `cargo tree`, whose build
+    // dependencies resolve for the host. Filtering metadata to a cross target drops
+    // those host crates (windows-sys when building darwin on Windows), so the SBOM
+    // missed build code that audit then flagged as omitted-build.
     opts.common(&mut cmd);
     let meta: Value = serde_json::from_str(&run(cmd)?).context("parsing cargo metadata")?;
     let workspace_root = PathBuf::from(

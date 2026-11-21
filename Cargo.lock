@@ -436,7 +436,7 @@ dependencies = [
 
 [[package]]
 name = "sbom-attest"
-version = "0.4.7"
+version = "0.4.8"
 dependencies = [
  "anyhow",
  "base64",
