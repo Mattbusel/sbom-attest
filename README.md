@@ -70,7 +70,7 @@ sbom-attest audit sbom.cdx.json --waive no-license                # warns: this 
 
 ```yaml
 - run: cargo cyclonedx --format json      # or syft, cargo-sbom: anything that writes CycloneDX/SPDX JSON
-- uses: Mattbusel/sbom-attest@v0.4.3
+- uses: Mattbusel/sbom-attest@v0.4.4
   with:
     sbom: my-app.cdx.json
     package: my-app            # optional: the workspace package the SBOM describes

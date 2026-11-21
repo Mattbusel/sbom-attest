@@ -603,6 +603,10 @@ fn vendored_component(p: &Pkg, features: &[String], scope: Scope) -> Option<Comp
 fn bundled_version(lib: &str, crate_dir: &Path) -> Option<String> {
     let (header, define) = match lib {
         "sqlite" => ("sqlite3/sqlite3.h", "SQLITE_VERSION"),
+        "aws-lc" => (
+            "aws-lc/include/openssl/base.h",
+            "AWSLC_VERSION_NUMBER_STRING",
+        ),
         _ => return None,
     };
     parse_define_version(
@@ -693,6 +697,15 @@ mod tests {
             ),
             Some("3.46.0".into())
         );
+        let dir = std::env::temp_dir().join("sbom-attest-awslc-header");
+        std::fs::create_dir_all(dir.join("aws-lc/include/openssl")).unwrap();
+        std::fs::write(
+            dir.join("aws-lc/include/openssl/base.h"),
+            "#define AWSLC_VERSION_NUMBER_STRING \"5.7.0\"
+",
+        )
+        .unwrap();
+        assert_eq!(bundled_version("aws-lc", &dir), Some("5.7.0".into()));
     }
 
     #[test]
