@@ -222,6 +222,8 @@ const KNOWN_LICENSES: &[&str] = &[
     "CC-BY-4.0",
     "CC0-1.0",
     "CDDL-1.0",
+    "CDLA-Permissive-1.0",
+    "CDLA-Permissive-2.0",
     "EPL-1.0",
     "EPL-2.0",
     "EUPL-1.2",
@@ -359,6 +361,8 @@ mod tests {
         assert_eq!(spdx_expression("MIT  OR  Apache-2.0"), "MIT OR Apache-2.0");
         assert!(spdx_expression_known("(MIT OR Apache-2.0) AND Unicode-3.0"));
         assert!(spdx_expression_known("Apache-2.0 WITH LLVM-exception"));
+        // webpki-roots 1.x ships under the Mozilla root data license
+        assert!(spdx_expression_known("CDLA-Permissive-2.0"));
         assert!(!spdx_expression_known("Custom-License"));
         assert!(!spdx_expression_known(""));
     }
