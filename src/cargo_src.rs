@@ -264,9 +264,12 @@ fn component_for(p: &Pkg, checksum: Option<&String>, features: &[String]) -> Com
         c.hash_subject = Some("crate-archive".into());
     }
     c.license = p.s("license").map(spdx_expression);
-    if c.license.is_none() && p.s("license_file").is_some() {
-        c.properties
-            .insert("sbom-attest:license-file".into(), "declared".into());
+    if c.license.is_none() {
+        if let Some(lf) = p.s("license_file") {
+            c.license = license_from_file(p.s("manifest_path"), lf);
+            c.properties
+                .insert("sbom-attest:license-file".into(), "declared".into());
+        }
     }
     let authors: Vec<String> = p.v["authors"]
         .as_array()
@@ -599,6 +602,13 @@ fn vendored_component(p: &Pkg, features: &[String], scope: Scope) -> Option<Comp
     Some(c)
 }
 
+/// The SPDX id of a crate's `license-file` (e.g. MIT text with no `license` key).
+fn license_from_file(manifest: Option<&str>, license_file: &str) -> Option<String> {
+    let dir = Path::new(manifest?).parent()?;
+    let text = std::fs::read_to_string(dir.join(license_file)).ok()?;
+    crate::cc::detect_license(&text).map(str::to_string)
+}
+
 /// The version of a C library bundled in a crate's source, when its header states it.
 fn bundled_version(lib: &str, crate_dir: &Path) -> Option<String> {
     let (header, define) = match lib {
@@ -674,6 +684,28 @@ pub fn apply(inv: &mut Inventory, scan: CargoScan) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn license_file_text_names_the_license() {
+        let dir = std::env::temp_dir().join("sbom-attest-license-file");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(
+            dir.join("LICENSE"),
+            "MIT License
+
+Copyright (c) 2021 x
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+",
+        )
+        .unwrap();
+        let m = dir.join("Cargo.toml");
+        assert_eq!(
+            license_from_file(m.to_str(), "LICENSE").as_deref(),
+            Some("MIT")
+        );
+        assert_eq!(license_from_file(m.to_str(), "MISSING"), None);
+    }
 
     #[test]
     fn vendored_c_library_becomes_a_component() {
