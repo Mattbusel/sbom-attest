@@ -20,7 +20,9 @@ use std::process::Command;
 #[derive(Clone, Debug, Default)]
 pub struct CargoOptions {
     pub manifest_path: PathBuf,
-    pub package: Option<String>,
+    /// Workspace packages that produce the artifact. Several (a release archive of
+    /// several binaries) are described under one product root.
+    pub packages: Vec<String>,
     pub target: Option<String>,
     pub features: Vec<String>,
     pub all_features: bool,
@@ -344,26 +346,31 @@ pub fn scan(opts: &CargoOptions) -> Result<CargoScan> {
         .map(|v| Pkg { v })
         .collect();
 
-    // the root package: --package, else the resolve root
-    let root_id = match &opts.package {
-        Some(name) => packages
+    // the root packages: --package, else the resolve root
+    let local = |name: &str| -> Result<&Pkg> {
+        packages
             .iter()
             .find(|p| p.s("name") == Some(name) && p.source().is_none())
-            .and_then(|p| p.s("id"))
-            .ok_or_else(|| anyhow!("no workspace package named {name}"))?
-            .to_string(),
-        None => meta["resolve"]["root"]
-            .as_str()
-            .ok_or_else(|| {
-                anyhow!("this is a virtual workspace: pass --package to pick the artifact")
-            })?
-            .to_string(),
+            .ok_or_else(|| anyhow!("no workspace package named {name}"))
     };
-    let root_pkg = packages
+    let root_pkgs: Vec<&Pkg> = if opts.packages.is_empty() {
+        let id = meta["resolve"]["root"].as_str().ok_or_else(|| {
+            anyhow!("this is a virtual workspace: pass --package to pick the artifact")
+        })?;
+        vec![packages
+            .iter()
+            .find(|p| p.s("id") == Some(id))
+            .ok_or_else(|| anyhow!("root package missing from metadata"))?]
+    } else {
+        opts.packages
+            .iter()
+            .map(|n| local(n))
+            .collect::<Result<_>>()?
+    };
+    let root_names: Vec<String> = root_pkgs
         .iter()
-        .find(|p| p.s("id") == Some(root_id.as_str()))
-        .ok_or_else(|| anyhow!("root package missing from metadata"))?;
-    let root_name = root_pkg.s("name").unwrap_or_default().to_string();
+        .map(|p| p.s("name").unwrap_or_default().to_string())
+        .collect();
 
     let lock_path = workspace_root.join("Cargo.lock");
     let checksums = std::fs::read_to_string(&lock_path)
@@ -383,7 +390,9 @@ pub fn scan(opts: &CargoOptions) -> Result<CargoScan> {
             "-e",
             edges,
         ]);
-        cmd.arg("--package").arg(&root_name);
+        for n in &root_names {
+            cmd.arg("--package").arg(n);
+        }
         // without --target, cargo tree resolves for the host, which is what gets built
         if let Some(t) = &opts.target {
             cmd.arg("--target").arg(t);
@@ -470,26 +479,58 @@ pub fn scan(opts: &CargoOptions) -> Result<CargoScan> {
         }
     }
 
-    let root_cid = cargo_id(&root_name, root_pkg.s("version").unwrap_or_default(), None);
-    let mut root = comps
-        .remove(&root_cid)
-        .unwrap_or_else(|| component_for(root_pkg, None, &[]));
-    root.kind = if root_pkg.has_bin() {
-        Kind::Application
-    } else {
-        Kind::Library
-    };
-    root.scope = Scope::Required;
-    if root.hashes.is_empty() {
-        if let Some(manifest) = root_pkg.s("manifest_path") {
-            if let Some(h) = package_source_digest(Path::new(manifest), opts.offline) {
-                root.hashes.push(("SHA-256".into(), h.0));
-                root.hash_subject = Some("source-files".into());
-                root.properties
-                    .insert("sbom-attest:file-count".into(), h.1.to_string());
+    let root = if let [root_pkg] = root_pkgs[..] {
+        let root_cid = cargo_id(
+            root_pkg.s("name").unwrap_or_default(),
+            root_pkg.s("version").unwrap_or_default(),
+            None,
+        );
+        let mut root = comps
+            .remove(&root_cid)
+            .unwrap_or_else(|| component_for(root_pkg, None, &[]));
+        root.kind = if root_pkg.has_bin() {
+            Kind::Application
+        } else {
+            Kind::Library
+        };
+        root.scope = Scope::Required;
+        if root.hashes.is_empty() {
+            if let Some(manifest) = root_pkg.s("manifest_path") {
+                if let Some(h) = package_source_digest(Path::new(manifest), opts.offline) {
+                    root.hashes.push(("SHA-256".into(), h.0));
+                    root.hash_subject = Some("source-files".into());
+                    root.properties
+                        .insert("sbom-attest:file-count".into(), h.1.to_string());
+                }
             }
         }
-    }
+        root
+    } else {
+        // several packages ship together: a product root that depends on each of them
+        let name = workspace_root
+            .file_name()
+            .map(|f| f.to_string_lossy().to_string())
+            .unwrap_or_else(|| "workspace".into());
+        let mut root = Component::new(format!("src:{name}"), Kind::Application, &name);
+        root.version = root_pkgs[0].s("version").map(String::from);
+        root.lang = Lang::Rust;
+        root.evidence.insert("cargo-metadata".into());
+        for p in &root_pkgs {
+            let cid = cargo_id(
+                p.s("name").unwrap_or_default(),
+                p.s("version").unwrap_or_default(),
+                None,
+            );
+            if let Some(c) = comps.get_mut(&cid) {
+                c.scope = Scope::Required;
+                if p.has_bin() {
+                    c.kind = Kind::Application;
+                }
+            }
+            edges.insert((root.id.clone(), cid));
+        }
+        root
+    };
 
     Ok(CargoScan {
         root,

@@ -24,9 +24,10 @@ struct GenArgs {
     /// Skip the Rust side even if a Cargo.toml exists
     #[arg(long)]
     no_cargo: bool,
-    /// Workspace package that produces the artifact
-    #[arg(short, long)]
-    package: Option<String>,
+    /// Workspace package that produces the artifact; repeat (or comma separate) for
+    /// an artifact that ships several packages' binaries
+    #[arg(short, long, value_delimiter = ',')]
+    package: Vec<String>,
     /// Target triple; features and dependencies are resolved for it
     #[arg(long)]
     target: Option<String>,
@@ -100,7 +101,7 @@ impl GenArgs {
         } else {
             manifest.map(|m| cargo_src::CargoOptions {
                 manifest_path: m,
-                package: self.package.clone(),
+                packages: self.package.clone(),
                 target: self.target.clone(),
                 features: self.features.clone(),
                 all_features: self.all_features,
@@ -112,7 +113,10 @@ impl GenArgs {
         GenerateOptions {
             cargo,
             project_root: self.project_root.clone(),
-            name: self.name.clone().or_else(|| self.package.clone()),
+            name: self.name.clone().or_else(|| match &self.package[..] {
+                [one] => Some(one.clone()),
+                _ => None,
+            }),
             version: self.product_version.clone(),
             firmware: self.firmware,
             compile_commands: self.compile_commands.clone(),

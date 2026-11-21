@@ -627,3 +627,74 @@ fn c_build_from_compile_commands_log_and_map() {
         "C root is not memory safe"
     );
 }
+
+/// A release archive that ships several workspace binaries gets one SBOM covering
+/// exactly those packages' graphs, not every member of the workspace.
+#[test]
+fn several_packages_share_one_product_root() {
+    let ws = tmp("multi");
+    let fx = fixture("target-cfg-features");
+    let fx = fx.to_string_lossy().replace('\\', "/");
+    std::fs::write(
+        ws.join("Cargo.toml"),
+        "[workspace]\nmembers = [\"a\", \"b\", \"t\"]\nresolver = \"2\"\n",
+    )
+    .unwrap();
+    for (name, dep) in [("a", "x"), ("b", "y"), ("t", "dep")] {
+        std::fs::create_dir_all(ws.join(name).join("src")).unwrap();
+        std::fs::write(
+            ws.join(name).join("Cargo.toml"),
+            format!(
+                "[package]\nname = \"{name}\"\nversion = \"1.2.3\"\nedition = \"2021\"\n\
+                 [dependencies]\n{dep} = {{ path = \"{fx}/{dep}\" }}\n"
+            ),
+        )
+        .unwrap();
+        std::fs::write(ws.join(name).join("src/main.rs"), "fn main() {}\n").unwrap();
+    }
+    let path = ws.join("sbom.cdx.json");
+    run_ok(
+        bin()
+            .arg("generate")
+            .arg("--manifest-path")
+            .arg(ws.join("Cargo.toml"))
+            .args([
+                "--offline",
+                "-p",
+                "a,b",
+                "--name",
+                "suite",
+                "--timestamp",
+                "0",
+            ])
+            .arg("--cdx")
+            .arg(&path),
+    );
+    let doc: Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+    assert_eq!(names(&doc), ["a", "b", "x", "y"]);
+    assert_eq!(doc["metadata"]["component"]["name"], "suite");
+    assert_eq!(doc["metadata"]["component"]["version"], "1.2.3");
+    let root = doc["metadata"]["component"]["bom-ref"].as_str().unwrap();
+    let deps = doc["dependencies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|d| d["ref"] == root)
+        .unwrap()["dependsOn"]
+        .to_string();
+    assert!(
+        deps.contains("a@1.2.3") && deps.contains("b@1.2.3"),
+        "{deps}"
+    );
+
+    // the virtual workspace still needs a package named
+    let o = bin()
+        .arg("generate")
+        .arg("--manifest-path")
+        .arg(ws.join("Cargo.toml"))
+        .args(["--offline", "--cdx"])
+        .arg(ws.join("none.json"))
+        .output()
+        .unwrap();
+    assert!(!o.status.success());
+}
